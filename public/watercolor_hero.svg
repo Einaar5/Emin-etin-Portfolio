@@ -1,0 +1,100 @@
+<svg width="100%" viewBox="0 0 1200 500" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Modern Tasarımla İstediğinize Göre Çözümler</title>
+  <desc>Suluboya arka planlı hero section</desc>
+
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+    </style>
+
+    <filter id="wc1" x="-40%" y="-80%" width="180%" height="260%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.06" numOctaves="4" seed="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="28" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur in="displaced" stdDeviation="10" result="blurred"/>
+      <feComposite in="blurred" in2="blurred" operator="over"/>
+    </filter>
+    <filter id="wc2" x="-40%" y="-80%" width="180%" height="260%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.07" numOctaves="4" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="32" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur in="displaced" stdDeviation="12" result="blurred"/>
+    </filter>
+    <filter id="wc3" x="-40%" y="-80%" width="180%" height="260%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.05" numOctaves="3" seed="13" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="24" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur in="displaced" stdDeviation="9"/>
+    </filter>
+    <filter id="wc4" x="-40%" y="-80%" width="180%" height="260%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06 0.04" numOctaves="4" seed="19" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur in="displaced" stdDeviation="11"/>
+    </filter>
+    <filter id="wc5" x="-40%" y="-80%" width="180%" height="260%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.08" numOctaves="4" seed="31" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="26" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur in="displaced" stdDeviation="13"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="500" fill="#ffffff"/>
+
+  <!-- SALMON / PEACH - sol -->
+  <ellipse cx="295" cy="248" rx="165" ry="48" fill="#f0a090" opacity="0.55" filter="url(#wc1)"/>
+  <ellipse cx="330" cy="240" rx="120" ry="36" fill="#f8b8a0" opacity="0.4" filter="url(#wc3)"/>
+  <ellipse cx="270" cy="258" rx="90" ry="30" fill="#fcc8b0" opacity="0.3" filter="url(#wc2)"/>
+
+  <!-- YELLOW/PEACH - sol-orta -->
+  <ellipse cx="460" cy="250" rx="150" ry="44" fill="#f5c870" opacity="0.5" filter="url(#wc2)"/>
+  <ellipse cx="430" cy="238" rx="100" ry="32" fill="#fad890" opacity="0.35" filter="url(#wc1)"/>
+
+  <!-- LAVENDER/PURPLE - orta -->
+  <ellipse cx="590" cy="245" rx="130" ry="42" fill="#c090e0" opacity="0.45" filter="url(#wc4)"/>
+  <ellipse cx="620" cy="258" rx="90" ry="30" fill="#d4a8ec" opacity="0.3" filter="url(#wc3)"/>
+
+  <!-- LIGHT BLUE - orta-sağ -->
+  <ellipse cx="780" cy="242" rx="160" ry="46" fill="#80c8f0" opacity="0.45" filter="url(#wc2)"/>
+  <ellipse cx="820" cy="255" rx="110" ry="34" fill="#a8daf8" opacity="0.32" filter="url(#wc1)"/>
+
+  <!-- MINT/TEAL - sağ -->
+  <ellipse cx="970" cy="246" rx="155" ry="48" fill="#70dcc0" opacity="0.48" filter="url(#wc5)"/>
+  <ellipse cx="940" cy="258" rx="110" ry="34" fill="#92e8ce" opacity="0.32" filter="url(#wc3)"/>
+  <ellipse cx="1000" cy="240" rx="80" ry="26" fill="#60d4b8" opacity="0.28" filter="url(#wc2)"/>
+
+  <!-- Bağlantı bloblari -->
+  <ellipse cx="380" cy="252" rx="80" ry="28" fill="#f0b0c0" opacity="0.22" filter="url(#wc1)"/>
+  <ellipse cx="700" cy="248" rx="100" ry="32" fill="#b0d8f4" opacity="0.2" filter="url(#wc4)"/>
+  <ellipse cx="870" cy="244" rx="75" ry="24" fill="#78dcc8" opacity="0.2" filter="url(#wc3)"/>
+
+  <!-- Heading line 1 -->
+  <text x="600" y="215"
+    text-anchor="middle"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="800"
+    font-size="54"
+    fill="#111111"
+    letter-spacing="-1.5">Modern Tasarımla</text>
+
+  <!-- Heading line 2 -->
+  <text x="600" y="282"
+    text-anchor="middle"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="800"
+    font-size="54"
+    fill="#111111"
+    letter-spacing="-1.5">İstediğinize Göre Çözümler</text>
+
+  <!-- Subtitle 1 -->
+  <text x="600" y="342"
+    text-anchor="middle"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="400"
+    font-size="17"
+    fill="#666666">Markanızı en iyi şekilde yansıtan modern ve etkileyici tasarımlar sunuyoruz.</text>
+
+  <!-- Subtitle 2 -->
+  <text x="600" y="370"
+    text-anchor="middle"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="400"
+    font-size="17"
+    fill="#666666">Hayalinizdeki projeyi birlikte gerçeğe dönüştürelim.</text>
+</svg>
