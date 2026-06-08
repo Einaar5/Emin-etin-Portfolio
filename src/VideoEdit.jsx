@@ -1,24 +1,17 @@
 import { useState } from "react"
+import { useContent } from "./content/ContentContext"
 
-// Video düzenleme bölümü — YouTube kanal linki.
-// Linkin üstüne gelince kanalın videoları gömülü oynatıcıda açılır.
-const CHANNEL_URL = "https://www.youtube.com/@Hermitme"
-// Kanal ID UC... -> yüklenenler oynatma listesi UU... (iframe'de gömülebilir)
-const EMBED_URL = "https://www.youtube-nocookie.com/embed/videoseries?list=UUGPjKD70Vf9giHNXuEgRrbA"
-
+// Video düzenleme bölümü — içerik admin panelden yönetilir (content.video).
 export default function VideoEdit() {
   const [hover, setHover] = useState(false)
+  const { content } = useContent()
+  const v = content.video
 
   return (
     <section className="ve-section">
-      <p className="ve-eyebrow">Video Düzenleme</p>
-      <h2 className="ve-heading">
-        Sadece statik değil; <em>hareketli</em> de tasarlıyorum
-      </h2>
-      <p className="ve-desc">
-        Tanıtım videoları, reels & shorts kurgusu, ürün videoları ve sosyal medya
-        içerikleri. Video düzenleme çalışmalarımı YouTube kanalımda paylaşıyorum.
-      </p>
+      <p className="ve-eyebrow">{v.eyebrow}</p>
+      <h2 className="ve-heading" dangerouslySetInnerHTML={{ __html: v.heading }} />
+      <p className="ve-desc">{v.desc}</p>
 
       <div
         className="ve-link-wrap"
@@ -26,7 +19,7 @@ export default function VideoEdit() {
         onMouseLeave={() => setHover(false)}
       >
         <a
-          href={CHANNEL_URL}
+          href={v.channelUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="ve-link"
@@ -36,7 +29,7 @@ export default function VideoEdit() {
               <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
             </svg>
           </span>
-          <span>YouTube · @Hermitme</span>
+          <span>{v.label}</span>
           <span className="ve-arrow">↗</span>
         </a>
 
@@ -44,12 +37,12 @@ export default function VideoEdit() {
         <div className={`ve-preview ${hover ? "open" : ""}`} aria-hidden={!hover}>
           <div className="ve-preview-bar">
             <span className="ve-dot" /><span className="ve-dot" /><span className="ve-dot" />
-            <span className="ve-preview-url">youtube.com/@Hermitme</span>
+            <span className="ve-preview-url">{v.previewUrl}</span>
           </div>
           {hover && (
             <iframe
-              src={EMBED_URL}
-              title="YouTube — @Hermitme"
+              src={v.embedUrl}
+              title={v.label}
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen

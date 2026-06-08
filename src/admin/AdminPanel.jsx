@@ -1,0 +1,420 @@
+import { useRef, useState } from "react"
+import { useContent } from "../content/ContentContext"
+import { exportContent, importContent } from "../content/storage"
+import { AUTH_KEY } from "./AuthGate"
+import ImageField from "./ImageField"
+import "./admin.css"
+
+const TABS = [
+  { id: "about", label: "Hakkımda" },
+  { id: "collections", label: "Koleksiyonlar" },
+  { id: "services", label: "Hizmetler" },
+  { id: "video", label: "Video" },
+  { id: "contact", label: "İletişim & Footer" },
+  { id: "general", label: "Genel" },
+  { id: "backup", label: "Kaydet / Yedek" },
+]
+
+// Diziyi kopyalayıp i. ve j. elemanı taşır.
+const move = (arr, i, j) => {
+  if (j < 0 || j >= arr.length) return arr
+  const copy = arr.slice()
+  const [el] = copy.splice(i, 1)
+  copy.splice(j, 0, el)
+  return copy
+}
+const uid = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+
+export default function AdminPanel() {
+  const { content, update, reset, replace, saveError } = useContent()
+  const [tab, setTab] = useState("about")
+
+  const exit = () => {
+    try { sessionStorage.removeItem(AUTH_KEY) } catch { /* yoksay */ }
+    window.location.hash = ""
+    window.location.reload()
+  }
+
+  return (
+    <div className="adm">
+      <div className="adm-top">
+        <span className="adm-brand">Yönetim Paneli <span>· {content.nav.logo}</span></span>
+        <div className="adm-top-spacer" />
+        <a className="adm-btn" href="#" onClick={() => (window.location.hash = "")}>← Siteyi gör</a>
+        <button className="adm-btn danger" onClick={exit}>Çıkış</button>
+      </div>
+
+      <div className="adm-tabs">
+        {TABS.map((t) => (
+          <button key={t.id} className={`adm-tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="adm-body">
+        {saveError && (
+          <div className="adm-warn">
+            ⚠ Değişiklik tarayıcı hafızasına kaydedilemedi (alan dolmuş olabilir). Çok sayıda büyük
+            görsel yüklediyseniz, bazılarını silin veya "Mevcuttan seç" ile public görselleri kullanın.
+          </div>
+        )}
+
+        {tab === "about" && <AboutTab content={content} update={update} />}
+        {tab === "collections" && <CollectionsTab content={content} update={update} />}
+        {tab === "services" && <ServicesTab content={content} update={update} />}
+        {tab === "video" && <VideoTab content={content} update={update} />}
+        {tab === "contact" && <ContactTab content={content} update={update} />}
+        {tab === "general" && <GeneralTab content={content} update={update} />}
+        {tab === "backup" && <BackupTab content={content} reset={reset} replace={replace} />}
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------- Koleksiyonlar ------------------------- */
+function CollectionsTab({ content, update }) {
+  const setCols = (fn) => update((c) => ({ ...c, collections: fn(c.collections) }))
+
+  const addCollection = () =>
+    setCols((cols) => [...cols, { id: uid("col"), title: "Yeni Koleksiyon", desc: "", works: [] }])
+
+  const editCol = (idx, patch) =>
+    setCols((cols) => cols.map((c, i) => (i === idx ? { ...c, ...patch } : c)))
+
+  const removeCol = (idx) => {
+    if (!confirm("Bu koleksiyonu ve içindeki tüm çalışmaları silmek istiyor musunuz?")) return
+    setCols((cols) => cols.filter((_, i) => i !== idx))
+  }
+
+  const setWorks = (cIdx, fn) =>
+    setCols((cols) => cols.map((c, i) => (i === cIdx ? { ...c, works: fn(c.works) } : c)))
+
+  const addWork = (cIdx) =>
+    setWorks(cIdx, (w) => [...w, { id: uid("work"), title: "Yeni Çalışma", image: "" }])
+  const editWork = (cIdx, wIdx, patch) =>
+    setWorks(cIdx, (w) => w.map((x, i) => (i === wIdx ? { ...x, ...patch } : x)))
+  const removeWork = (cIdx, wIdx) => setWorks(cIdx, (w) => w.filter((_, i) => i !== wIdx))
+
+  return (
+    <>
+      <div className="adm-card-head">
+        <h3>Koleksiyonlar</h3>
+        <div className="adm-top-spacer" />
+        <button className="adm-btn primary" onClick={addCollection}>+ Koleksiyon Ekle</button>
+      </div>
+
+      {content.collections.map((col, cIdx) => (
+        <div className="adm-card" key={col.id}>
+          <div className="adm-card-head">
+            <h3>{col.title || "(başlıksız)"}</h3>
+            <div className="adm-top-spacer" />
+            <div className="adm-actions">
+              <button className="adm-btn icon" disabled={cIdx === 0} onClick={() => setCols((c) => move(c, cIdx, cIdx - 1))}>↑</button>
+              <button className="adm-btn icon" disabled={cIdx === content.collections.length - 1} onClick={() => setCols((c) => move(c, cIdx, cIdx + 1))}>↓</button>
+              <button className="adm-btn danger" onClick={() => removeCol(cIdx)}>Sil</button>
+            </div>
+          </div>
+
+          <div className="adm-row">
+            <div className="adm-field">
+              <label>Başlık</label>
+              <input className="adm-input" value={col.title} onChange={(e) => editCol(cIdx, { title: e.target.value })} />
+            </div>
+            <div className="adm-field">
+              <label>Açıklama</label>
+              <input className="adm-input" value={col.desc} onChange={(e) => editCol(cIdx, { desc: e.target.value })} />
+            </div>
+          </div>
+
+          <p className="adm-hint">{col.works.length} çalışma</p>
+
+          {col.works.map((w, wIdx) => (
+            <div className="adm-work" key={w.id}>
+              <ImageField value={w.image} onChange={(img) => editWork(cIdx, wIdx, { image: img })} />
+              <div className="adm-work-fields">
+                <div className="adm-field">
+                  <label>Çalışma başlığı</label>
+                  <input className="adm-input" value={w.title} onChange={(e) => editWork(cIdx, wIdx, { title: e.target.value })} />
+                </div>
+                <div className="adm-actions">
+                  <button className="adm-btn icon" disabled={wIdx === 0} onClick={() => setWorks(cIdx, (x) => move(x, wIdx, wIdx - 1))}>↑</button>
+                  <button className="adm-btn icon" disabled={wIdx === col.works.length - 1} onClick={() => setWorks(cIdx, (x) => move(x, wIdx, wIdx + 1))}>↓</button>
+                  <button className="adm-btn danger" onClick={() => removeWork(cIdx, wIdx)}>Sil</button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <button className="adm-btn" onClick={() => addWork(cIdx)}>+ Çalışma Ekle</button>
+        </div>
+      ))}
+    </>
+  )
+}
+
+/* ------------------------- Hakkımda ------------------------- */
+function AboutTab({ content, update }) {
+  const a = content.about
+  const edit = (patch) => update((c) => ({ ...c, about: { ...c.about, ...patch } }))
+  const setStats = (fn) => update((c) => ({ ...c, about: { ...c.about, stats: fn(c.about.stats || []) } }))
+  const editStat = (idx, patch) => setStats((s) => s.map((x, i) => (i === idx ? { ...x, ...patch } : x)))
+  const addStat = () => setStats((s) => [...s, { value: "0", label: "Yeni" }])
+  const removeStat = (idx) => setStats((s) => s.filter((_, i) => i !== idx))
+
+  return (
+    <>
+      <div className="adm-card">
+        <h3>Hakkımda Bölümü</h3>
+        <div className="adm-row">
+          <ImageField value={a.image} onChange={(img) => edit({ image: img })} />
+          <div className="adm-work-fields">
+            <div className="adm-field">
+              <label>Üst etiket (eyebrow)</label>
+              <input className="adm-input" value={a.eyebrow} onChange={(e) => edit({ eyebrow: e.target.value })} />
+            </div>
+            <div className="adm-field">
+              <label>Başlık (&lt;em&gt;...&lt;/em&gt; ile vurgu)</label>
+              <input className="adm-input" value={a.heading} onChange={(e) => edit({ heading: e.target.value })} />
+            </div>
+            <p className="adm-hint">Görsel opsiyonel — boş bırakılırsa metin tam genişlik olur.</p>
+          </div>
+        </div>
+        <div className="adm-field">
+          <label>Tanıtım metni</label>
+          <textarea className="adm-textarea" style={{ minHeight: 120 }} value={a.body} onChange={(e) => edit({ body: e.target.value })} />
+        </div>
+      </div>
+
+      <div className="adm-card">
+        <div className="adm-card-head">
+          <h3>İstatistikler</h3>
+          <div className="adm-top-spacer" />
+          <button className="adm-btn primary" onClick={addStat}>+ Ekle</button>
+        </div>
+        {(a.stats || []).map((s, idx) => (
+          <div className="adm-row" key={idx} style={{ alignItems: "flex-end" }}>
+            <div className="adm-field" style={{ maxWidth: 140, flex: "0 0 140px" }}>
+              <label>Değer</label>
+              <input className="adm-input" value={s.value} onChange={(e) => editStat(idx, { value: e.target.value })} />
+            </div>
+            <div className="adm-field">
+              <label>Etiket</label>
+              <input className="adm-input" value={s.label} onChange={(e) => editStat(idx, { label: e.target.value })} />
+            </div>
+            <div className="adm-field" style={{ flex: "0 0 auto" }}>
+              <button className="adm-btn danger" onClick={() => removeStat(idx)}>Sil</button>
+            </div>
+          </div>
+        ))}
+        {(!a.stats || a.stats.length === 0) && <p className="adm-hint">Henüz istatistik yok.</p>}
+      </div>
+    </>
+  )
+}
+
+/* ------------------------- Hizmetler ------------------------- */
+function ServicesTab({ content, update }) {
+  const setSrv = (fn) => update((c) => ({ ...c, services: fn(c.services) }))
+  const edit = (idx, patch) => setSrv((s) => s.map((x, i) => (i === idx ? { ...x, ...patch } : x)))
+  const add = () => setSrv((s) => [...s, { no: String(s.length + 1).padStart(2, "0"), title: "Yeni Hizmet", desc: "" }])
+  const remove = (idx) => setSrv((s) => s.filter((_, i) => i !== idx))
+
+  return (
+    <>
+      <div className="adm-card-head">
+        <h3>Hizmetler</h3>
+        <div className="adm-top-spacer" />
+        <button className="adm-btn primary" onClick={add}>+ Hizmet Ekle</button>
+      </div>
+
+      {content.services.map((s, idx) => (
+        <div className="adm-card" key={idx}>
+          <div className="adm-row">
+            <div className="adm-field" style={{ maxWidth: 90, flex: "0 0 90px" }}>
+              <label>No</label>
+              <input className="adm-input" value={s.no} onChange={(e) => edit(idx, { no: e.target.value })} />
+            </div>
+            <div className="adm-field">
+              <label>Başlık</label>
+              <input className="adm-input" value={s.title} onChange={(e) => edit(idx, { title: e.target.value })} />
+            </div>
+          </div>
+          <div className="adm-field">
+            <label>Açıklama</label>
+            <textarea className="adm-textarea" value={s.desc} onChange={(e) => edit(idx, { desc: e.target.value })} />
+          </div>
+          <div className="adm-actions">
+            <button className="adm-btn icon" disabled={idx === 0} onClick={() => setSrv((x) => move(x, idx, idx - 1))}>↑</button>
+            <button className="adm-btn icon" disabled={idx === content.services.length - 1} onClick={() => setSrv((x) => move(x, idx, idx + 1))}>↓</button>
+            <button className="adm-btn danger" onClick={() => remove(idx)}>Sil</button>
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}
+
+/* ------------------------- Video ------------------------- */
+function VideoTab({ content, update }) {
+  const v = content.video
+  const edit = (patch) => update((c) => ({ ...c, video: { ...c.video, ...patch } }))
+  return (
+    <div className="adm-card">
+      <h3>Video Bölümü</h3>
+      <div className="adm-field">
+        <label>Üst etiket (eyebrow)</label>
+        <input className="adm-input" value={v.eyebrow} onChange={(e) => edit({ eyebrow: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Başlık (vurgu için &lt;em&gt;...&lt;/em&gt; kullanılabilir)</label>
+        <input className="adm-input" value={v.heading} onChange={(e) => edit({ heading: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Açıklama</label>
+        <textarea className="adm-textarea" value={v.desc} onChange={(e) => edit({ desc: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Buton etiketi</label>
+        <input className="adm-input" value={v.label} onChange={(e) => edit({ label: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Kanal linki (buton)</label>
+        <input className="adm-input" value={v.channelUrl} onChange={(e) => edit({ channelUrl: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Önizleme URL etiketi</label>
+        <input className="adm-input" value={v.previewUrl} onChange={(e) => edit({ previewUrl: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Gömülü oynatıcı (embed) URL</label>
+        <input className="adm-input" value={v.embedUrl} onChange={(e) => edit({ embedUrl: e.target.value })} />
+        <p className="adm-hint">youtube-nocookie embed linki. Oynatma listesi için ...videoseries?list=UU... biçimi.</p>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------- İletişim & Footer ------------------------- */
+function ContactTab({ content, update }) {
+  const editContact = (patch) => update((c) => ({ ...c, contact: { ...c.contact, ...patch } }))
+  const editFooter = (patch) => update((c) => ({ ...c, footer: { ...c.footer, ...patch } }))
+  return (
+    <>
+      <div className="adm-card">
+        <h3>İletişim</h3>
+        <div className="adm-field">
+          <label>Başlık (&lt;br /&gt; ve &lt;em&gt;...&lt;/em&gt; kullanılabilir)</label>
+          <textarea className="adm-textarea" value={content.contact.heading} onChange={(e) => editContact({ heading: e.target.value })} />
+        </div>
+        <div className="adm-field">
+          <label>E-posta</label>
+          <input className="adm-input" value={content.contact.email} onChange={(e) => editContact({ email: e.target.value })} />
+        </div>
+      </div>
+      <div className="adm-card">
+        <h3>Footer</h3>
+        <div className="adm-row">
+          <div className="adm-field">
+            <label>Sol yazı</label>
+            <input className="adm-input" value={content.footer.left} onChange={(e) => editFooter({ left: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Sağ yazı</label>
+            <input className="adm-input" value={content.footer.right} onChange={(e) => editFooter({ right: e.target.value })} />
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+/* ------------------------- Genel ------------------------- */
+function GeneralTab({ content, update }) {
+  const editNav = (patch) => update((c) => ({ ...c, nav: { ...c.nav, ...patch } }))
+  const editPortfolio = (patch) => update((c) => ({ ...c, portfolio: { ...c.portfolio, ...patch } }))
+  const editNum = (key, val) => update((c) => ({ ...c, [key]: { count: Math.max(1, parseInt(val, 10) || 1) } }))
+  return (
+    <>
+      <div className="adm-card">
+        <h3>Site Genel</h3>
+        <div className="adm-field">
+          <label>Logo / İsim (nav)</label>
+          <input className="adm-input" value={content.nav.logo} onChange={(e) => editNav({ logo: e.target.value })} />
+        </div>
+      </div>
+      <div className="adm-card">
+        <h3>Portfolyo Bölümü</h3>
+        <div className="adm-field">
+          <label>Başlık</label>
+          <input className="adm-input" value={content.portfolio.heading} onChange={(e) => editPortfolio({ heading: e.target.value })} />
+        </div>
+        <div className="adm-field">
+          <label>Alt başlık</label>
+          <input className="adm-input" value={content.portfolio.subtitle} onChange={(e) => editPortfolio({ subtitle: e.target.value })} />
+        </div>
+      </div>
+      <div className="adm-card">
+        <h3>Hero & Kayan Görseller</h3>
+        <div className="adm-row">
+          <div className="adm-field">
+            <label>Hero görsel sayısı</label>
+            <input className="adm-input" type="number" min="1" value={content.hero.count} onChange={(e) => editNum("hero", e.target.value)} />
+          </div>
+          <div className="adm-field">
+            <label>Zoom/Arc görsel sayısı</label>
+            <input className="adm-input" type="number" min="1" value={content.zoom.count} onChange={(e) => editNum("zoom", e.target.value)} />
+          </div>
+        </div>
+        <p className="adm-hint">Bu bölümler çalışmaların ilk N görselini kullanır.</p>
+      </div>
+    </>
+  )
+}
+
+/* ------------------------- Kaydet / Yedek ------------------------- */
+function BackupTab({ content, reset, replace }) {
+  const fileRef = useRef(null)
+  const [msg, setMsg] = useState(null)
+
+  const onImport = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const next = await importContent(file)
+      replace(next)
+      setMsg({ type: "ok", text: "İçerik başarıyla yüklendi." })
+    } catch {
+      setMsg({ type: "err", text: "Dosya okunamadı veya geçersiz JSON." })
+    } finally {
+      if (fileRef.current) fileRef.current.value = ""
+    }
+  }
+
+  const onReset = () => {
+    if (confirm("Tüm değişiklikler silinip varsayılan içeriğe dönülecek. Emin misiniz?")) {
+      reset()
+      setMsg({ type: "ok", text: "Varsayılan içeriğe dönüldü." })
+    }
+  }
+
+  return (
+    <div className="adm-card">
+      <h3>Kaydet / Yedek</h3>
+      <p className="adm-hint" style={{ marginBottom: 16 }}>
+        Değişiklikler otomatik olarak bu tarayıcıya kaydedilir. Tüm ziyaretçilere yansıması için
+        "JSON İndir" ile dosyayı indirip <code>content.json</code> olarak siteyle birlikte
+        yeniden yayınlayın.
+      </p>
+
+      {msg && <div className={msg.type === "ok" ? "adm-hint" : "adm-warn"} style={msg.type === "ok" ? { color: "var(--adm-green)" } : undefined}>{msg.text}</div>}
+
+      <div className="adm-actions" style={{ gap: 10 }}>
+        <button className="adm-btn green" onClick={() => exportContent(content)}>⬇ JSON İndir</button>
+        <button className="adm-btn" onClick={() => fileRef.current?.click()}>⬆ JSON Yükle</button>
+        <button className="adm-btn danger" onClick={onReset}>↺ Varsayılana Sıfırla</button>
+        <input ref={fileRef} type="file" accept="application/json,.json" onChange={onImport} style={{ display: "none" }} />
+      </div>
+    </div>
+  )
+}

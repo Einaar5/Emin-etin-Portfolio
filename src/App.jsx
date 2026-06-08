@@ -9,83 +9,9 @@ import AnimatedFolder from './AnimatedFolder'
 import Slider from "./Slider";
 import GalleryPage from './GalleryPage'
 import VideoEdit from './VideoEdit'
-
-// Web için optimize edilmiş görseller (public/images/opt) — boşluk/Türkçe karakterler encode edilir
-const img = (name) => `/images/opt/${encodeURIComponent(name)}`
-
-// Tüm çalışmalar — ürün adı değil, tasarım iş başlıkları kullanıldı
-const collections = [
-  {
-    id: "logo",
-    title: "Logo & Marka",
-    desc: "Marka kimliği ve logo çalışmaları",
-    works: [
-      { id: "logo-1", title: "Marka Kimliği 01", image: img("165c7dd7-c5bf-459e-bfb5-e97072556d15.jpg") },
-      { id: "logo-2", title: "Marka Kimliği 02", image: img("c163fc0c-ae43-40c3-96dc-f782bcd9dacb.jpg") },
-      { id: "logo-3", title: "Marka Kimliği 03", image: img("Screenshot_6.png") },
-    ],
-  },
-  {
-    id: "afis",
-    title: "Afiş Tasarımları",
-    desc: "Tanıtım ve reklam afişleri",
-    works: [
-      { id: "afis-1", title: "Afiş Tasarımı 01", image: img("adaptör.png") },
-      { id: "afis-2", title: "Afiş Tasarımı 02", image: img("kulaklık mcdodo.png") },
-      { id: "afis-3", title: "Afiş Tasarımı 03", image: img("şarj kablosu.png") },
-      { id: "afis-4", title: "Afiş Tasarımı 04", image: img("1e9dcf07-ec8c-480e-9251-9510bf261dcc.png") },
-      { id: "afis-5", title: "Afiş Tasarımı 05", image: img("4b453f16-d42a-49d5-aaf0-40970cf8bf9c.jpg") },
-    ],
-  },
-  {
-    id: "banner",
-    title: "Banner Çalışmaları",
-    desc: "Web banner ve kampanya görselleri",
-    works: [
-      { id: "banner-1", title: "Web Bannerı 01", image: img("girişsağ 1.png") },
-      { id: "banner-2", title: "Web Bannerı 02", image: img("turunculu yeni - Kopya.png") },
-      { id: "banner-3", title: "Web Bannerı 03", image: img("s - Kopya.png") },
-    ],
-  },
-  {
-    id: "dergi",
-    title: "Dergi & Katalog",
-    desc: "Katalog kapağı ve dergi sayfa tasarımları",
-    works: [
-      { id: "dergi-1", title: "Katalog Tasarımı 01", image: img("güneş masa sandalye katolog kapak-1.png") },
-      { id: "dergi-2", title: "Katalog Tasarımı 02", image: img("513aace3-fb42-4bb5-8315-336bc9ddde84.jpg") },
-      { id: "dergi-3", title: "Katalog Tasarımı 03", image: img("80240309-ab22-460d-bbb0-55d6e755c245.jpg") },
-      { id: "dergi-4", title: "Katalog Tasarımı 04", image: img("82b80cf2-80f7-467d-8c68-bdbd3edebace.jpg") },
-    ],
-  },
-  {
-    id: "diger",
-    title: "Diğer Çalışmalar",
-    desc: "Ürün görselleri ve çeşitli tasarımlar",
-    works: [
-      { id: "diger-1", title: "Ürün Görseli 01", image: img("kompakt lens.png") },
-      { id: "diger-2", title: "Ürün Görseli 02", image: img("ekran koruyucu.png") },
-      { id: "diger-3", title: "Ürün Görseli 03", image: img("telefon kılıf 1.png") },
-      { id: "diger-4", title: "Ürün Görseli 04", image: img("powerbank.png") },
-      { id: "diger-5", title: "Ürün Görseli 05", image: img("kulaklık.png") },
-      { id: "diger-6", title: "Ürün Görseli 06", image: img("ses bombası.png") },
-      { id: "diger-7", title: "Ürün Görseli 07", image: img("806180d4-af03-4969-9479-2edac78b2066.jpg") },
-      { id: "diger-8", title: "Ürün Görseli 08", image: img("takiped.png") },
-    ],
-  },
-]
-
-const allWorks = collections.flatMap((c) => c.works)
-
-// HeroParallax kayan kartları (15 adet, jenerik başlıklar)
-const products = allWorks.slice(0, 15).map((w, i) => ({
-  title: `Çalışma ${String(i + 1).padStart(2, "0")}`,
-  link: "#",
-  thumbnail: w.image,
-}))
-
-// ArcGalleryHero / ZoomParallax görselleri
-const images = allWorks.slice(0, 13).map((w) => w.image)
+import { useContent } from './content/ContentContext'
+import AuthGate, { AUTH_KEY } from './admin/AuthGate'
+import AdminPanel from './admin/AdminPanel'
 
 function useFadeIn() {
   const ref = useRef(null)
@@ -109,17 +35,39 @@ function useFadeIn() {
   return ref
 }
 
-const SERVICES = [
-  { no: '01', title: 'Logo & Marka Kimliği', desc: 'Markanı yansıtan özgün logo ve kurumsal kimlik tasarımı.' },
-  { no: '02', title: 'Afiş & Banner', desc: 'Dikkat çeken tanıtım, kampanya ve web banner görselleri.' },
-  { no: '03', title: 'Katalog & Dergi', desc: 'Akıcı ve düzenli katalog kapağı ile dergi sayfa tasarımı.' },
-  { no: '04', title: 'Sosyal Medya', desc: 'Post, story ve reels için bütünlüklü içerik tasarımı.' },
-  { no: '05', title: 'Ambalaj Tasarımı', desc: 'Ürünü rafta öne çıkaran ambalaj ve etiket görselleri.' },
-  { no: '06', title: 'Video Düzenleme', desc: 'Kurgu, renk ve efektle akıcı hareketli içerik üretimi.' },
-  { no: '07', title: 'Sosyal Medya Yönetimi', desc: 'İçerik planlama, paylaşım takvimi ve hesap büyütme yönetimi.' },
-]
-
+// Üst seviye yönlendirici: #admin ise panel/şifre, değilse site.
 export default function App() {
+  const [hash, setHash] = useState(() => (typeof window !== 'undefined' ? window.location.hash : ''))
+  const [authed, setAuthed] = useState(() => {
+    try { return sessionStorage.getItem(AUTH_KEY) === '1' } catch { return false }
+  })
+
+  useEffect(() => {
+    const onHash = () => setHash(window.location.hash)
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  if (hash === '#admin') {
+    return authed ? <AdminPanel /> : <AuthGate onSuccess={() => setAuthed(true)} />
+  }
+  return <SiteRoot />
+}
+
+function SiteRoot() {
+  const { content } = useContent()
+
+  // İçerikten türetilen veriler
+  const collections = content.collections
+  const allWorks = collections.flatMap((c) => c.works)
+  const products = allWorks.slice(0, content.hero.count).map((w, i) => ({
+    title: `Çalışma ${String(i + 1).padStart(2, '0')}`,
+    link: '#',
+    thumbnail: w.image,
+  }))
+  const images = allWorks.slice(0, content.zoom.count).map((w) => w.image)
+  const SERVICES = content.services
+
   const [lenis, setLenis] = useState(null)
   const [view, setView] = useState({ page: 'home' }) // 'home' | { page:'gallery', id }
   const [menuOpen, setMenuOpen] = useState(false)
@@ -128,6 +76,7 @@ export default function App() {
   const ringPos = useRef({ x: -100, y: -100, tx: -100, ty: -100 })
   const rafRef = useRef(null)
 
+  const aboutRef = useFadeIn()
   const contactRef = useFadeIn()
 
   /* Lenis */
@@ -200,7 +149,7 @@ export default function App() {
       <div className="cursor-ring" ref={ringRef} />
 
       <nav className="nav">
-        <span className="nav-logo" onClick={() => { goHome(); setMenuOpen(false) }}>Emin Çetin</span>
+        <span className="nav-logo" onClick={() => { goHome(); setMenuOpen(false) }}>{content.nav.logo}</span>
         <button
           className={`nav-toggle ${menuOpen ? 'open' : ''}`}
           onClick={() => setMenuOpen(o => !o)}
@@ -210,6 +159,7 @@ export default function App() {
           <span /><span /><span />
         </button>
         <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
+          <a onClick={() => { scrollTo('#hakkimda'); setMenuOpen(false) }}>Hakkımda</a>
           <a onClick={() => { scrollTo('#calismalar'); setMenuOpen(false) }}>Çalışmalar</a>
           <a onClick={() => { scrollTo('#hizmetler'); setMenuOpen(false) }}>Hizmetler</a>
           <a onClick={() => { openGallery(); setMenuOpen(false) }}>Galeri</a>
@@ -223,6 +173,31 @@ export default function App() {
       ) : (
         <>
           <HeroParallax products={products} />
+
+          <section id="hakkimda" className="about-section reveal" ref={aboutRef}>
+            <div className="about-inner">
+              <div className="about-text">
+                <p className="section-eyebrow">{content.about.eyebrow}</p>
+                <h2 className="section-heading" dangerouslySetInnerHTML={{ __html: content.about.heading }} />
+                <p className="about-body">{content.about.body}</p>
+                {content.about.stats?.length > 0 && (
+                  <div className="about-stats">
+                    {content.about.stats.map((s, i) => (
+                      <div className="about-stat" key={i}>
+                        <span className="about-stat-value">{s.value}</span>
+                        <span className="about-stat-label">{s.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {content.about.image && (
+                <div className="about-media">
+                  <img src={content.about.image} alt={content.nav.logo} />
+                </div>
+              )}
+            </div>
+          </section>
 
           <Slider />
 
@@ -246,10 +221,10 @@ export default function App() {
             <div style={{ width: "100%", maxWidth: "1152px" }}>
               <header style={{ marginBottom: "64px", textAlign: "center" }}>
                 <h2 style={{ fontSize: "2.25rem", fontWeight: 800, marginBottom: "12px", letterSpacing: "-0.025em", color: "#0f172a" }}>
-                  Tasarım Portfolyom
+                  {content.portfolio.heading}
                 </h2>
                 <p style={{ color: "#64748b", fontWeight: 500 }}>
-                  Klasörlere tıklayarak galeriye göz atabilirsiniz.
+                  {content.portfolio.subtitle}
                 </p>
               </header>
 
@@ -296,13 +271,13 @@ export default function App() {
             </div>
 
             <section id="contact" className="contact-section reveal" ref={contactRef}>
-              <h2 className="contact-heading">Birlikte<br /><em>güzel</em> bir şey tasarlayalım</h2>
-              <a className="contact-link" href="mailto:emincetin061@gmail.com">emincetin061@gmail.com</a>
+              <h2 className="contact-heading" dangerouslySetInnerHTML={{ __html: content.contact.heading }} />
+              <a className="contact-link" href={`mailto:${content.contact.email}`}>{content.contact.email}</a>
             </section>
 
             <footer className="footer">
-              <span className="footer-text">© 2026 Emin Çetin</span>
-              <span className="footer-text">Grafik Tasarım</span>
+              <span className="footer-text">{content.footer.left}</span>
+              <span className="footer-text">{content.footer.right}</span>
             </footer>
           </div>
         </>
