@@ -1,7 +1,8 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useContent } from "../content/ContentContext"
 import { exportContent, importContent } from "../content/storage"
-import { AUTH_KEY } from "./AuthGate"
+import { checkApiHealth } from "../content/api"
+import { AUTH_KEY, ADMIN_PW_KEY } from "./AuthGate"
 import ImageField from "./ImageField"
 import LivePreview from "./LivePreview"
 import "./admin.css"
@@ -29,13 +30,24 @@ const move = (arr, i, j) => {
 const uid = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 
 export default function AdminPanel() {
-  const { content, update, reset, replace, publishNow, syncFromServer, dbState, saveError } = useContent()
+  const { content, update, reset, replace, publishNow, syncFromServer, dbState, dbError, saveError } = useContent()
   const [tab, setTab] = useState("live")
+  const [apiOk, setApiOk] = useState(null) // null: kontrol ediliyor, true/false: sonuç
 
-  const dbLabel = { idle: "", saving: "⏳ DB'ye kaydediliyor…", saved: "✓ DB'ye kaydedildi", error: "⚠ Kaydedilemedi" }[dbState]
+  // Açılışta API sunucusunun gerçekten ayakta olduğunu doğrula.
+  useEffect(() => {
+    checkApiHealth().then(setApiOk)
+  }, [])
 
-  const exit = () => {
-    try { sessionStorage.removeItem(AUTH_KEY) } catch { /* yoksay */ }
+  const dbLabel = { idle: "", saving: "⏳ DB'ye kaydediliyor…", saved: "✓ DB'ye kaydedildi", error: "⚠ DB'ye kaydedilemedi!" }[dbState]
+
+  const exit = async () => {
+    // Bekleyen değişiklikler kaybolmasın: çıkmadan önce DB'ye gönder.
+    try { await publishNow() } catch { /* kaydedilemese de çıkışa devam */ }
+    try {
+      sessionStorage.removeItem(AUTH_KEY)
+      sessionStorage.removeItem(ADMIN_PW_KEY)
+    } catch { /* yoksay */ }
     window.location.hash = ""
     window.location.reload()
   }
@@ -59,6 +71,20 @@ export default function AdminPanel() {
       </div>
 
       <div className="adm-body">
+        {apiOk === false && (
+          <div className="adm-warn">
+            🚫 <strong>API sunucusuna ulaşılamıyor!</strong> Değişiklikler veritabanına KAYDEDİLEMEZ.
+            Site büyük ihtimalle "statik site" olarak yayınlanmış. Render'da <strong>Web Service</strong> olarak
+            deploy edilmeli: Build Command <code>npm install &amp;&amp; npm run build</code>, Start Command{" "}
+            <code>npm start</code>, Environment'a <code>DATABASE_URL</code> ve <code>ADMIN_PASSWORD</code> eklenmeli.
+            (Yerelde çalışıyorsan ayrı terminalde <code>npm run server</code> açık olmalı.)
+          </div>
+        )}
+        {dbState === "error" && dbError && (
+          <div className="adm-warn">
+            ⚠ <strong>Veritabanına kaydedilemedi:</strong> {dbError}
+          </div>
+        )}
         {saveError && (
           <div className="adm-warn">
             ⚠ Değişiklik tarayıcı hafızasına kaydedilemedi (alan dolmuş olabilir). Çok sayıda büyük

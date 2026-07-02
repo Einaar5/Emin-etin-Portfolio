@@ -11,8 +11,9 @@ export function ContentProvider({ children }) {
   // İlk render: hızlı gösterim için yerel önbellek (admin) ya da varsayılan (canlı).
   const [content, setContent] = useState(() => (isAdminMode() ? loadContent() : structuredClone(DEFAULT_CONTENT)))
   const [saveError, setSaveError] = useState(null)
-  // DB kayıt durumu: 'idle' | 'saving' | 'saved' | 'error'
+  // DB kayıt durumu: 'idle' | 'saving' | 'saved' | 'error' — hata detayı dbError'da
   const [dbState, setDbState] = useState("idle")
+  const [dbError, setDbError] = useState(null)
 
   const loaded = useRef(false)      // ilk DB yüklemesi tamamlandı mı
   const skipNextSave = useRef(false) // yüklenen içeriği tekrar DB'ye yazma
@@ -41,8 +42,8 @@ export function ContentProvider({ children }) {
     clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
       saveServerContent(content)
-        .then(() => setDbState("saved"))
-        .catch((e) => { setDbState("error"); setSaveError(e) })
+        .then(() => { setDbState("saved"); setDbError(null) })
+        .catch((e) => { setDbState("error"); setDbError(String(e?.message || e)) })
     }, 700)
     return () => clearTimeout(saveTimer.current)
   }, [content])
@@ -74,10 +75,10 @@ export function ContentProvider({ children }) {
     setDbState("saving")
     try {
       await saveServerContent(content)
-      setDbState("saved")
+      setDbState("saved"); setDbError(null)
       return true
     } catch (e) {
-      setDbState("error"); setSaveError(e)
+      setDbState("error"); setDbError(String(e?.message || e))
       throw e
     }
   }, [content])
@@ -94,7 +95,7 @@ export function ContentProvider({ children }) {
   }, [])
 
   return (
-    <ContentContext.Provider value={{ content, update, reset, replace, publishNow, syncFromServer, dbState, saveError }}>
+    <ContentContext.Provider value={{ content, update, reset, replace, publishNow, syncFromServer, dbState, dbError, saveError }}>
       {children}
     </ContentContext.Provider>
   )
