@@ -111,6 +111,21 @@ function SiteRoot() {
   const aboutRef = useFadeIn()
   const contactRef = useFadeIn()
 
+  // Browser geri/ileri tuşları için history yönetimi
+  useEffect(() => {
+    const handlePopState = (e) => {
+      if (e.state?.view === 'gallery') {
+        setView({ page: 'gallery', id: e.state.id })
+      } else {
+        setView({ page: 'home' })
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
   /* Lenis */
   useEffect(() => {
     const l = new Lenis({
@@ -168,14 +183,22 @@ function SiteRoot() {
     }
   }, [])
 
-  const openGallery = (id) => setView({ page: 'gallery', id })
+  const openGallery = (id) => {
+    setView({ page: 'gallery', id })
+    // History'ye ekle ki geri tuşu çalışsın
+    history.pushState({ view: 'gallery', id }, '', window.location.pathname + '#gallery')
+  }
   const goHome = () => {
     setView({ page: 'home' })
+    // Ana sayfaya dönerken history'yi değiştir
+    history.pushState({ view: 'home' }, '', window.location.pathname)
     // Anasayfaya döndüğünde en üste scroll et
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100)
   }
   const scrollTo = (sel) => {
-    goHome()
+    if (view.page !== 'home') {
+      goHome()
+    }
     setTimeout(() => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' }), 200)
   }
 
