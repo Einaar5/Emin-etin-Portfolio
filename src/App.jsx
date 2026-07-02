@@ -169,10 +169,14 @@ function SiteRoot() {
   }, [])
 
   const openGallery = (id) => setView({ page: 'gallery', id })
-  const goHome = () => setView({ page: 'home' })
+  const goHome = () => {
+    setView({ page: 'home' })
+    // Anasayfaya döndüğünde en üste scroll et
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100)
+  }
   const scrollTo = (sel) => {
     goHome()
-    setTimeout(() => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' }), 60)
+    setTimeout(() => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' }), 200)
   }
 
   return (
