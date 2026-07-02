@@ -56,6 +56,24 @@ export default function App() {
 function SiteRoot() {
   const { content } = useContent()
 
+  // İçerik yüklenene kadar loading göster
+  if (!content) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#fff',
+        color: '#64748b',
+        fontSize: '1.2rem',
+        fontWeight: 500
+      }}>
+        Yükleniyor...
+      </div>
+    )
+  }
+
   // İçerikten türetilen veriler
   const collections = content.collections
   const allWorks = collections.flatMap((c) => c.works)
@@ -282,6 +300,8 @@ function SiteRoot() {
               subtitle={content.arc?.subtitle}
               button1Text={content.arc?.button1Text}
               button2Text={content.arc?.button2Text}
+              onButton1Click={() => openGallery()}
+              onButton2Click={() => scrollTo('#contact')}
             />
 
             <div id="video">

@@ -8,8 +8,8 @@ const ContentContext = createContext(null)
 const isAdminMode = () => typeof window !== "undefined" && window.location.hash === "#admin"
 
 export function ContentProvider({ children }) {
-  // İlk render: hızlı gösterim için yerel önbellek (admin) ya da varsayılan (canlı).
-  const [content, setContent] = useState(() => (isAdminMode() ? loadContent() : structuredClone(DEFAULT_CONTENT)))
+  // İlk render: yükleniyor durumu
+  const [content, setContent] = useState(null)
   const [saveError, setSaveError] = useState(null)
   // DB kayıt durumu: 'idle' | 'saving' | 'saved' | 'error' — hata detayı dbError'da
   const [dbState, setDbState] = useState("idle")
@@ -36,7 +36,7 @@ export function ContentProvider({ children }) {
 
   // Admin düzenledikçe içeriği otomatik DB'ye kaydet (debounce).
   useEffect(() => {
-    if (!isAdminMode() || !loaded.current) return
+    if (!content || !isAdminMode() || !loaded.current) return
     if (skipNextSave.current) { skipNextSave.current = false; return }
     setDbState("saving")
     clearTimeout(saveTimer.current)

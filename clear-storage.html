@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Önbelleği Temizle</title>
+</head>
+<body style="font-family: system-ui, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto;">
+    <h1>Önbelleği Temizle</h1>
+    <p>Bu sayfa tarayıcı önbelleğini (localStorage) temizler ve siteyi yeniler.</p>
+    <button onclick="clearAndReload()" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600;">
+        Önbelleği Temizle ve Yenile
+    </button>
+    <div id="result" style="margin-top: 20px; padding: 12px; border-radius: 8px; display: none;"></div>
+    
+    <script>
+        function clearAndReload() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                const result = document.getElementById('result');
+                result.style.display = 'block';
+                result.style.background = '#dcfce7';
+                result.style.color = '#166534';
+                result.textContent = 'Önbellek temizlendi! 2 saniye içinde ana sayfaya yönlendirileceksiniz...';
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } catch (e) {
+                const result = document.getElementById('result');
+                result.style.display = 'block';
+                result.style.background = '#fee2e2';
+                result.style.color = '#991b1b';
+                result.textContent = 'Hata: ' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>

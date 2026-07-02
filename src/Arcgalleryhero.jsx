@@ -6,6 +6,8 @@ export default function ArcGalleryHero({
     subtitle = "Logodan afişe, katalogdan banner tasarımına; markanı öne çıkaran özgün görseller üretiyorum.",
     button1Text = "Çalışmaları Gör",
     button2Text = "İletişime Geç",
+    onButton1Click = null,
+    onButton2Click = null,
     startAngle = 20,
     endAngle = 160,
     radiusLg = 480,
@@ -167,11 +169,12 @@ export default function ArcGalleryHero({
                     </p>
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button
+                            onClick={onButton1Click}
                             style={{
                                 padding: '12px 28px', borderRadius: 999,
                                 background: '#0d0d0b', color: '#fff',
                                 border: 'none', fontSize: '0.9rem', fontWeight: 600,
-                                fontFamily: 'Inter, sans-serif', cursor: 'none',
+                                fontFamily: 'Inter, sans-serif', cursor: 'pointer',
                                 boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
                                 transition: 'transform 0.2s, box-shadow 0.2s',
                             }}
@@ -181,11 +184,12 @@ export default function ArcGalleryHero({
                             {button1Text}
                         </button>
                         <button
+                            onClick={onButton2Click}
                             style={{
                                 padding: '12px 28px', borderRadius: 999,
                                 background: 'transparent', color: '#1a1a18',
                                 border: '1.5px solid #e2e2de', fontSize: '0.9rem', fontWeight: 500,
-                                fontFamily: 'Inter, sans-serif', cursor: 'none',
+                                fontFamily: 'Inter, sans-serif', cursor: 'pointer',
                                 transition: 'background 0.2s, border-color 0.2s',
                             }}
                             onMouseEnter={e => { e.currentTarget.style.background = '#f0f0ee'; e.currentTarget.style.borderColor = '#a0a09a'; }}

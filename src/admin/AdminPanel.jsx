@@ -505,7 +505,7 @@ function ArcTab({ content, update }) {
 
       <div className="adm-card">
         <div className="adm-card-head">
-          <h3>Arc Galeri Görselleri</h3>
+          <h3>Arc Galeri Görselleri ({images.length} görsel)</h3>
           <div className="adm-top-spacer" />
           <div className="adm-actions">
             <button className="adm-btn" onClick={fillFromWorks}>⤵ Çalışmalardan doldur</button>
@@ -522,18 +522,32 @@ function ArcTab({ content, update }) {
           <p className="adm-hint">Liste boş — şu an çalışmaların ilk {content.zoom?.count || 13} görseli otomatik gösteriliyor.</p>
         )}
 
-        {images.map((img, idx) => (
-          <div className="adm-work" key={idx}>
-            <ImageField value={img} onChange={(val) => editImage(idx, val)} />
-            <div className="adm-work-fields">
-              <div className="adm-actions">
-                <button className="adm-btn icon" disabled={idx === 0} onClick={() => setImages((x) => move(x, idx, idx - 1))}>↑</button>
-                <button className="adm-btn icon" disabled={idx === images.length - 1} onClick={() => setImages((x) => move(x, idx, idx + 1))}>↓</button>
-                <button className="adm-btn danger" onClick={() => removeImage(idx)}>Sil</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {images.map((img, idx) => (
+            <div className="adm-work" key={idx} style={{ marginBottom: 0 }}>
+              <div style={{ flex: '0 0 120px', width: 120, height: 120 }}>
+                <ImageField value={img} onChange={(val) => editImage(idx, val)} />
+              </div>
+              <div className="adm-work-fields" style={{ flex: 1 }}>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.85rem', color: '#64748b' }}>Görsel #{idx + 1}</label>
+                  <input 
+                    className="adm-input" 
+                    value={img} 
+                    readOnly
+                    style={{ fontSize: '0.8rem', color: '#94a3b8', cursor: 'default' }}
+                    placeholder="Görsel yolu"
+                  />
+                </div>
+                <div className="adm-actions">
+                  <button className="adm-btn icon" disabled={idx === 0} onClick={() => setImages((x) => move(x, idx, idx - 1))}>↑</button>
+                  <button className="adm-btn icon" disabled={idx === images.length - 1} onClick={() => setImages((x) => move(x, idx, idx + 1))}>↓</button>
+                  <button className="adm-btn danger" onClick={() => removeImage(idx)}>Sil</button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {images.length > 0 && (
           <button className="adm-btn danger" style={{ marginTop: 12 }} onClick={clearImages}>Listeyi temizle (otomatiğe dön)</button>
