@@ -3,6 +3,7 @@ import "./admin.css"
 
 export const ADMIN_PASSWORD = "vEr5g45FWd23.gT"
 export const AUTH_KEY = "admin-auth"
+export const ADMIN_PW_KEY = "admin-pw" // DB'ye yazarken gönderilecek şifre (oturum boyunca)
 
 export default function AuthGate({ onSuccess }) {
   const [value, setValue] = useState("")
@@ -11,7 +12,10 @@ export default function AuthGate({ onSuccess }) {
   const submit = (e) => {
     e.preventDefault()
     if (value === ADMIN_PASSWORD) {
-      try { sessionStorage.setItem(AUTH_KEY, "1") } catch { /* yoksay */ }
+      try {
+        sessionStorage.setItem(AUTH_KEY, "1")
+        sessionStorage.setItem(ADMIN_PW_KEY, value) // DB yazma yetkisi için sakla
+      } catch { /* yoksay */ }
       onSuccess()
     } else {
       setError(true)

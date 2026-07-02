@@ -13,4 +13,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Geliştirmede /api isteklerini yerel API sunucusuna yönlendir (npm run server)
+  server: {
+    proxy: {
+      "/api": "http://localhost:3001",
+    },
+  },
 })

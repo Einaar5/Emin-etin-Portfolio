@@ -29,8 +29,10 @@ const move = (arr, i, j) => {
 const uid = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 
 export default function AdminPanel() {
-  const { content, update, reset, replace, syncFromPublished, saveError } = useContent()
+  const { content, update, reset, replace, publishNow, syncFromServer, dbState, saveError } = useContent()
   const [tab, setTab] = useState("live")
+
+  const dbLabel = { idle: "", saving: "⏳ DB'ye kaydediliyor…", saved: "✓ DB'ye kaydedildi", error: "⚠ Kaydedilemedi" }[dbState]
 
   const exit = () => {
     try { sessionStorage.removeItem(AUTH_KEY) } catch { /* yoksay */ }
@@ -42,6 +44,7 @@ export default function AdminPanel() {
     <div className="adm">
       <div className="adm-top">
         <span className="adm-brand">Yönetim Paneli <span>· {content.nav.logo}</span></span>
+        {dbLabel && <span className={`adm-db-state ${dbState}`}>{dbLabel}</span>}
         <div className="adm-top-spacer" />
         <a className="adm-btn" href="#" onClick={() => (window.location.hash = "")}>← Siteyi gör</a>
         <button className="adm-btn danger" onClick={exit}>Çıkış</button>
@@ -71,7 +74,7 @@ export default function AdminPanel() {
         {tab === "video" && <VideoTab content={content} update={update} />}
         {tab === "contact" && <ContactTab content={content} update={update} />}
         {tab === "general" && <GeneralTab content={content} update={update} />}
-        {tab === "backup" && <BackupTab content={content} reset={reset} replace={replace} syncFromPublished={syncFromPublished} />}
+        {tab === "backup" && <BackupTab content={content} reset={reset} replace={replace} publishNow={publishNow} syncFromServer={syncFromServer} />}
       </div>
     </div>
   )
@@ -552,16 +555,25 @@ function GeneralTab({ content, update }) {
 }
 
 /* ------------------------- Kaydet / Yedek ------------------------- */
-function BackupTab({ content, reset, replace, syncFromPublished }) {
+function BackupTab({ content, reset, replace, publishNow, syncFromServer }) {
   const fileRef = useRef(null)
   const [msg, setMsg] = useState(null)
 
+  const onPublish = async () => {
+    try {
+      await publishNow()
+      setMsg({ type: "ok", text: "İçerik veritabanına (DB) kaydedildi. Tüm ziyaretçiler artık bunu görür." })
+    } catch (e) {
+      setMsg({ type: "err", text: `DB'ye kaydedilemedi: ${e.message}` })
+    }
+  }
+
   const onSync = async () => {
-    if (!confirm("Yayındaki content.json çekilecek ve bu tarayıcıdaki tüm yerel düzenlemeler onunla değiştirilecek. Devam edilsin mi?")) return
-    const ok = await syncFromPublished()
+    if (!confirm("Veritabanındaki güncel içerik çekilecek ve bu tarayıcıdaki düzenlemeler onunla değiştirilecek. Devam edilsin mi?")) return
+    const ok = await syncFromServer()
     setMsg(ok
-      ? { type: "ok", text: "Yayındaki içerik çekildi ve yerel taslak sıfırlandı." }
-      : { type: "err", text: "Yayında content.json bulunamadı; varsayılana dönüldü." })
+      ? { type: "ok", text: "Veritabanındaki içerik çekildi." }
+      : { type: "err", text: "Veritabanında içerik bulunamadı; varsayılana dönüldü." })
   }
 
   const onImport = async (e) => {
@@ -589,21 +601,17 @@ function BackupTab({ content, reset, replace, syncFromPublished }) {
     <div className="adm-card">
       <h3>Kaydet / Yedek</h3>
       <p className="adm-hint" style={{ marginBottom: 16 }}>
-        Değişiklikler otomatik olarak <strong>yalnızca bu tarayıcıya</strong> kaydedilir; canlı sitede
-        herkese görünmez. Yayınlamak için:
+        Yaptığın değişiklikler <strong>otomatik olarak veritabanına (DB) kaydedilir</strong> ve tüm ziyaretçilere
+        anında yansır — dosya indirmene gerek yok. Aşağıdaki butonlar yedekleme/onarım içindir.
       </p>
-      <ol className="adm-hint" style={{ marginBottom: 16, paddingLeft: 20, lineHeight: 1.7 }}>
-        <li>Aşağıdan <strong>"JSON İndir"</strong> ile dosyayı indir.</li>
-        <li>İnen dosyayı <code>content.json</code> adıyla projedeki <code>public/</code> klasörüne koy (varsa üzerine yaz).</li>
-        <li>Siteyi yeniden deploy et. Artık tüm ziyaretçiler güncel içeriği görür.</li>
-      </ol>
 
       {msg && <div className={msg.type === "ok" ? "adm-hint" : "adm-warn"} style={msg.type === "ok" ? { color: "var(--adm-green)" } : undefined}>{msg.text}</div>}
 
-      <div className="adm-actions" style={{ gap: 10 }}>
-        <button className="adm-btn green" onClick={() => exportContent(content)}>⬇ JSON İndir</button>
+      <div className="adm-actions" style={{ gap: 10, flexWrap: "wrap" }}>
+        <button className="adm-btn green" onClick={onPublish}>💾 Şimdi DB'ye Kaydet</button>
+        <button className="adm-btn" onClick={onSync}>⟳ DB'den Yenile</button>
+        <button className="adm-btn" onClick={() => exportContent(content)}>⬇ JSON Yedek İndir</button>
         <button className="adm-btn" onClick={() => fileRef.current?.click()}>⬆ JSON Yükle</button>
-        <button className="adm-btn" onClick={onSync}>⟳ Yayından Çek</button>
         <button className="adm-btn danger" onClick={onReset}>↺ Varsayılana Sıfırla</button>
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={onImport} style={{ display: "none" }} />
       </div>

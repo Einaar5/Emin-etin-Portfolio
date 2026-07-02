@@ -243,3 +243,9 @@ textarea.lp-input { min-height: 90px; resize: vertical; }
 }
 .lp-modal-head { display: flex; align-items: center; margin-bottom: 12px; }
 .lp-modal-head h3 { margin: 0; font-size: 1rem; }
+
+/* DB kayıt durumu göstergesi (üst bar) */
+.adm-db-state { font-size: .8rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; margin-left: 10px; }
+.adm-db-state.saving { color: #d29922; background: rgba(210,153,34,.12); }
+.adm-db-state.saved  { color: var(--adm-green); background: rgba(63,185,80,.12); }
+.adm-db-state.error  { color: var(--adm-danger); background: rgba(248,81,73,.12); }
