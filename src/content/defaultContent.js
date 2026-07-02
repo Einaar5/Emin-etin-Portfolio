@@ -27,7 +27,17 @@ export const DEFAULT_CONTENT = {
   },
 
   // Hero (HeroParallax) ve ZoomParallax kaç görsel kullansın
-  hero: { count: 15 },
+  // hero.items boşsa çalışmaların ilk `count` görseli otomatik kullanılır.
+  // Doluysa yalnızca bu liste kullanılır (tam kontrol).
+  // fit: "cover" = alanı doldur/kırp, "contain" = tamamı görünsün (kırpma yok).
+  hero: {
+    count: 15,
+    slogan: "Grafik Tasarım",
+    title1: "EMIN",
+    title2: "CETIN",
+    fit: "cover",
+    items: [], // [{ id, image, title, fit }]
+  },
   zoom: { count: 13 },
 
   collections: [

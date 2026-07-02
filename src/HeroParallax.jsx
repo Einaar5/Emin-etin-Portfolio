@@ -66,6 +66,7 @@ const BlurText = ({
 // ==========================================
 const ProductCard = ({ product, translate }) => {
     const [hovered, setHovered] = React.useState(false);
+    const fit = product.fit === "contain" ? "contain" : "cover";
 
     return (
         <motion.div
@@ -84,7 +85,15 @@ const ProductCard = ({ product, translate }) => {
                 href={product.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: "block", height: "100%", width: "100%", borderRadius: "16px", overflow: "hidden" }}
+                style={{
+                    display: "block",
+                    height: "100%",
+                    width: "100%",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    // contain modunda kenarlarda boşluk kalır; hafif zemin şık durur
+                    background: fit === "contain" ? "#f1f5f9" : "transparent",
+                }}
             >
                 <img
                     src={product.thumbnail}
@@ -96,8 +105,8 @@ const ProductCard = ({ product, translate }) => {
                         inset: 0,
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover",
-                        objectPosition: "left top",
+                        objectFit: fit,
+                        objectPosition: fit === "cover" ? "left top" : "center",
                     }}
                 />
             </a>
@@ -138,11 +147,17 @@ const ProductCard = ({ product, translate }) => {
 // ==========================================
 // 3. ANA BİLEŞEN (BİRLEŞTİRİLMİŞ HERO + PARALLAX)
 // ==========================================
-export default function HeroParallaxCustom({ products = [] }) {
-    // Parallax Verileri
-    const firstRow = products.slice(0, 5);
-    const secondRow = products.slice(5, 10);
-    const thirdRow = products.slice(10, 15);
+export default function HeroParallaxCustom({ products = [], hero = {} }) {
+    // Admin'den gelen metinler (yoksa varsayılan)
+    const slogan = hero.slogan ?? "Grafik Tasarım";
+    const title1 = hero.title1 ?? "EMIN";
+    const title2 = hero.title2 ?? "CETIN";
+
+    // Parallax verilerini 3 satıra eşit böl (görsel sayısı değişse de düzgün dağılır)
+    const per = Math.ceil(products.length / 3) || 1;
+    const firstRow = products.slice(0, per);
+    const secondRow = products.slice(per, per * 2);
+    const thirdRow = products.slice(per * 2, per * 3);
     const scrollRef = useRef(null);
 
     // Varsayılan tema FALSE yapıldı (Aydınlık mod / Beyaz arka plan ile başlar)
@@ -252,7 +267,7 @@ export default function HeroParallaxCustom({ products = [] }) {
                     <div className="relative text-center w-full px-4">
                         <div>
                             <BlurText
-                                text="EMIN"
+                                text={title1}
                                 delay={100}
                                 animateBy="letters"
                                 direction="top"
@@ -262,7 +277,7 @@ export default function HeroParallaxCustom({ products = [] }) {
                         </div>
                         <div>
                             <BlurText
-                                text="CETIN"
+                                text={title2}
                                 delay={100}
                                 animateBy="letters"
                                 direction="top"
@@ -288,7 +303,7 @@ export default function HeroParallaxCustom({ products = [] }) {
                     <div className="absolute bottom-16 sm:bottom-20 md:bottom-24 lg:bottom-32 xl:bottom-36 left-1/2 -translate-x-1/2 w-full px-6">
                         <div className="flex justify-center">
                             <BlurText
-                                text="Grafik Tasarım"
+                                text={slogan}
                                 delay={150}
                                 animateBy="words"
                                 direction="top"

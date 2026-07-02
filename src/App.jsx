@@ -60,11 +60,19 @@ function SiteRoot() {
   // İçerikten türetilen veriler
   const collections = content.collections
   const allWorks = collections.flatMap((c) => c.works)
-  const products = allWorks.slice(0, content.hero.count).map((w, i) => ({
-    title: `Çalışma ${String(i + 1).padStart(2, '0')}`,
-    link: '#',
-    thumbnail: w.image,
-  }))
+  const defaultFit = content.hero.fit || 'cover'
+  // hero.items doluysa onu kullan, boşsa çalışmaların ilk N görselinden türet.
+  const heroItems = (content.hero.items && content.hero.items.length > 0)
+    ? content.hero.items
+    : allWorks.slice(0, content.hero.count).map((w) => ({ image: w.image, title: w.title, fit: defaultFit }))
+  const products = heroItems
+    .filter((it) => it && it.image)
+    .map((it, i) => ({
+      title: it.title || `Çalışma ${String(i + 1).padStart(2, '0')}`,
+      link: '#',
+      thumbnail: it.image,
+      fit: it.fit || defaultFit,
+    }))
   const images = allWorks.slice(0, content.zoom.count).map((w) => w.image)
   const SERVICES = content.services
 
@@ -172,7 +180,7 @@ function SiteRoot() {
         <GalleryPage collections={collections} initialId={view.id} onBack={goHome} />
       ) : (
         <>
-          <HeroParallax products={products} />
+          <HeroParallax products={products} hero={content.hero} />
 
           <section id="hakkimda" className="about-section reveal" ref={aboutRef}>
             <div className="about-inner">

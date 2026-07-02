@@ -3,9 +3,12 @@ import { useContent } from "../content/ContentContext"
 import { exportContent, importContent } from "../content/storage"
 import { AUTH_KEY } from "./AuthGate"
 import ImageField from "./ImageField"
+import LivePreview from "./LivePreview"
 import "./admin.css"
 
 const TABS = [
+  { id: "live", label: "🖥 Canlı Site" },
+  { id: "hero", label: "Vitrin (Header)" },
   { id: "about", label: "Hakkımda" },
   { id: "collections", label: "Koleksiyonlar" },
   { id: "services", label: "Hizmetler" },
@@ -27,7 +30,7 @@ const uid = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36)
 
 export default function AdminPanel() {
   const { content, update, reset, replace, saveError } = useContent()
-  const [tab, setTab] = useState("about")
+  const [tab, setTab] = useState("live")
 
   const exit = () => {
     try { sessionStorage.removeItem(AUTH_KEY) } catch { /* yoksay */ }
@@ -60,6 +63,8 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {tab === "live" && <LivePreview />}
+        {tab === "hero" && <HeroTab content={content} update={update} />}
         {tab === "about" && <AboutTab content={content} update={update} />}
         {tab === "collections" && <CollectionsTab content={content} update={update} />}
         {tab === "services" && <ServicesTab content={content} update={update} />}
@@ -150,6 +155,169 @@ function CollectionsTab({ content, update }) {
         </div>
       ))}
     </>
+  )
+}
+
+/* ------------------------- Vitrin (Header) ------------------------- */
+function HeroTab({ content, update }) {
+  const hero = content.hero
+  const items = hero.items || []
+  const editHero = (patch) => update((c) => ({ ...c, hero: { ...c.hero, ...patch } }))
+  const setItems = (fn) => update((c) => ({ ...c, hero: { ...c.hero, items: fn(c.hero.items || []) } }))
+
+  const defaultFit = hero.fit || "cover"
+  const allWorks = content.collections.flatMap((c) => c.works)
+
+  const addItem = () =>
+    setItems((it) => [...it, { id: uid("hero"), image: "", title: "", fit: defaultFit }])
+  const editItem = (idx, patch) =>
+    setItems((it) => it.map((x, i) => (i === idx ? { ...x, ...patch } : x)))
+  const removeItem = (idx) => setItems((it) => it.filter((_, i) => i !== idx))
+
+  // Çalışmalardan otomatik doldur: ilk N görseli listeye kopyalar.
+  const fillFromWorks = () => {
+    const n = Math.max(1, parseInt(hero.count, 10) || 15)
+    const seeded = allWorks.slice(0, n).map((w) => ({
+      id: uid("hero"),
+      image: w.image,
+      title: w.title || "",
+      fit: defaultFit,
+    }))
+    setItems(() => seeded)
+  }
+  const clearItems = () => {
+    if (confirm("Vitrin görsel listesi temizlenecek. Liste boşken çalışmaların ilk görselleri otomatik kullanılır. Devam edilsin mi?")) {
+      setItems(() => [])
+    }
+  }
+
+  return (
+    <>
+      <div className="adm-card">
+        <h3>Başlık & Slogan</h3>
+        <p className="adm-hint" style={{ marginBottom: 12 }}>
+          Header'ın ortasındaki büyük yazılar ve altındaki slogan. Slogan olarak "Grafik Tasarım" yazan yer burasıdır.
+        </p>
+        <div className="adm-row">
+          <div className="adm-field">
+            <label>Büyük başlık — 1. satır</label>
+            <input className="adm-input" value={hero.title1 ?? ""} onChange={(e) => editHero({ title1: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Büyük başlık — 2. satır</label>
+            <input className="adm-input" value={hero.title2 ?? ""} onChange={(e) => editHero({ title2: e.target.value })} />
+          </div>
+        </div>
+        <div className="adm-field">
+          <label>Slogan (başlığın altındaki küçük yazı)</label>
+          <input className="adm-input" value={hero.slogan ?? ""} onChange={(e) => editHero({ slogan: e.target.value })} />
+        </div>
+      </div>
+
+      <div className="adm-card">
+        <div className="adm-card-head">
+          <h3>Vitrin Görselleri (kayan kartlar)</h3>
+          <div className="adm-top-spacer" />
+          <div className="adm-actions">
+            <button className="adm-btn" onClick={fillFromWorks}>⤵ Çalışmalardan doldur</button>
+            <button className="adm-btn primary" onClick={addItem}>+ Görsel Ekle</button>
+          </div>
+        </div>
+
+        <p className="adm-hint" style={{ marginBottom: 12 }}>
+          Aşağı kaydırınca kayan kartlar bu listeden gelir. Sıralama, sayfada soldan sağa/üstten alta dağılır.
+          Liste <strong>boşsa</strong> otomatik olarak çalışmaların ilk görselleri kullanılır — buradan
+          hangi görsellerin görüneceğini ve nasıl görüneceğini tam olarak sen belirle.
+        </p>
+
+        <div className="adm-field" style={{ maxWidth: 320 }}>
+          <label>Varsayılan görüntüleme biçimi</label>
+          <select className="adm-input" value={defaultFit} onChange={(e) => editHero({ fit: e.target.value })}>
+            <option value="cover">Alanı doldur / kırp (cover)</option>
+            <option value="contain">Tamamı görünsün / kırpma (contain)</option>
+          </select>
+          <p className="adm-hint">Yeni eklenen görseller bu biçimle başlar. Her görselin biçimini ayrıca değiştirebilirsin.</p>
+        </div>
+
+        {items.length === 0 && (
+          <p className="adm-hint">Liste boş — şu an çalışmaların ilk {hero.count} görseli otomatik gösteriliyor. "Çalışmalardan doldur" ile başlayabilirsin.</p>
+        )}
+
+        {items.map((it, idx) => (
+          <div className="adm-work" key={it.id || idx}>
+            <ImageField value={it.image} onChange={(img) => editItem(idx, { image: img })} />
+            <div className="adm-work-fields">
+              <div className="adm-field">
+                <label>Başlık (kartın üzerinde, opsiyonel)</label>
+                <input className="adm-input" value={it.title || ""} onChange={(e) => editItem(idx, { title: e.target.value })} />
+              </div>
+              <div className="adm-field" style={{ maxWidth: 260 }}>
+                <label>Görüntüleme biçimi</label>
+                <select className="adm-input" value={it.fit || defaultFit} onChange={(e) => editItem(idx, { fit: e.target.value })}>
+                  <option value="cover">Alanı doldur / kırp</option>
+                  <option value="contain">Tamamı görünsün / kırpma</option>
+                </select>
+              </div>
+              <div className="adm-actions">
+                <button className="adm-btn icon" disabled={idx === 0} onClick={() => setItems((x) => move(x, idx, idx - 1))}>↑</button>
+                <button className="adm-btn icon" disabled={idx === items.length - 1} onClick={() => setItems((x) => move(x, idx, idx + 1))}>↓</button>
+                <button className="adm-btn danger" onClick={() => removeItem(idx)}>Sil</button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {items.length > 0 && (
+          <button className="adm-btn danger" style={{ marginTop: 12 }} onClick={clearItems}>Listeyi temizle (otomatiğe dön)</button>
+        )}
+      </div>
+
+      <HeroPreview items={items.length > 0 ? items : allWorks.slice(0, Math.max(1, parseInt(hero.count, 10) || 15)).map((w) => ({ image: w.image, title: w.title, fit: defaultFit }))} defaultFit={defaultFit} />
+    </>
+  )
+}
+
+// Sitede nasıl görüneceğine dair birebir (kırpma/sığdırma) önizleme.
+function HeroPreview({ items, defaultFit }) {
+  const shown = items.filter((it) => it && it.image)
+  return (
+    <div className="adm-card">
+      <h3>Önizleme — sitede nasıl görünecek</h3>
+      <p className="adm-hint" style={{ marginBottom: 12 }}>
+        Kartların en-boy oranı sitedekiyle aynıdır (geniş dikdörtgen). "Kırp" seçilirse görsel taşan
+        kısımdan kesilir; "kırpma" seçilirse görselin tamamı sığdırılır (kenarlarda boşluk olabilir).
+      </p>
+      {shown.length === 0 ? (
+        <p className="adm-hint">Gösterilecek görsel yok.</p>
+      ) : (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+          {shown.map((it, i) => {
+            const fit = (it.fit || defaultFit) === "contain" ? "contain" : "cover"
+            return (
+              <div key={i} style={{
+                position: "relative",
+                width: 200,
+                height: 160, // 30rem x 24rem oranına yakın (5:4)
+                borderRadius: 12,
+                overflow: "hidden",
+                background: fit === "contain" ? "#f1f5f9" : "#0f172a",
+                border: "1px solid var(--adm-border, #33415522)",
+              }}>
+                <img src={it.image} alt="" loading="lazy" style={{
+                  position: "absolute", inset: 0, width: "100%", height: "100%",
+                  objectFit: fit, objectPosition: fit === "cover" ? "left top" : "center",
+                }} />
+                <span style={{
+                  position: "absolute", top: 6, left: 6,
+                  fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 6,
+                  background: "rgba(0,0,0,.6)", color: "#fff",
+                }}>{fit === "contain" ? "Tamamı" : "Kırpılmış"}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
