@@ -39,18 +39,16 @@ export const DEFAULT_CONTENT = {
     items: [], // [{ id, image, title, fit }]
   },
   zoom: { count: 13 },
+  
+  arc: {
+    heading: "Tasarımla Hikayeni Anlat",
+    subtitle: "Logodan afişe, katalogdan banner tasarımına; markanı öne çıkaran özgün görseller üretiyorum.",
+    button1Text: "Çalışmaları Gör",
+    button2Text: "İletişime Geç",
+    images: [], // Boşsa otomatik zoom.count kadar çalışmalardan alır
+  },
 
   collections: [
-    {
-      id: "logo",
-      title: "Logo & Marka",
-      desc: "Marka kimliği ve logo çalışmaları",
-      works: [
-        { id: "logo-1", title: "Marka Kimliği 01", image: opt("165c7dd7-c5bf-459e-bfb5-e97072556d15.jpg") },
-        { id: "logo-2", title: "Marka Kimliği 02", image: opt("c163fc0c-ae43-40c3-96dc-f782bcd9dacb.jpg") },
-        { id: "logo-3", title: "Marka Kimliği 03", image: opt("Screenshot_6.png") },
-      ],
-    },
     {
       id: "afis",
       title: "Afiş Tasarımları",
@@ -61,6 +59,16 @@ export const DEFAULT_CONTENT = {
         { id: "afis-3", title: "Afiş Tasarımı 03", image: opt("şarj kablosu.png") },
         { id: "afis-4", title: "Afiş Tasarımı 04", image: opt("1e9dcf07-ec8c-480e-9251-9510bf261dcc.png") },
         { id: "afis-5", title: "Afiş Tasarımı 05", image: opt("4b453f16-d42a-49d5-aaf0-40970cf8bf9c.jpg") },
+      ],
+    },
+    {
+      id: "logo",
+      title: "Logo & Marka",
+      desc: "Marka kimliği ve logo çalışmaları",
+      works: [
+        { id: "logo-1", title: "Marka Kimliği 01", image: opt("165c7dd7-c5bf-459e-bfb5-e97072556d15.jpg") },
+        { id: "logo-2", title: "Marka Kimliği 02", image: opt("c163fc0c-ae43-40c3-96dc-f782bcd9dacb.jpg") },
+        { id: "logo-3", title: "Marka Kimliği 03", image: opt("Screenshot_6.png") },
       ],
     },
     {

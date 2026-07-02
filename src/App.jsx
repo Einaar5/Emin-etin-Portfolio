@@ -3,7 +3,6 @@ import Lenis from 'lenis'
 import './App.css'
 import HeroParallax from './HeroParallax'
 import ArcGalleryHero from './Arcgalleryhero'
-import ZoomParallax from './Zoomparallax'
 import BentoCard from './BentoCard'
 import AnimatedFolder from './AnimatedFolder'
 import Slider from "./Slider";
@@ -61,10 +60,12 @@ function SiteRoot() {
   const collections = content.collections
   const allWorks = collections.flatMap((c) => c.works)
   const defaultFit = content.hero.fit || 'cover'
-  // hero.items doluysa onu kullan, boşsa çalışmaların ilk N görselinden türet.
+  // hero.items doluysa onu kullan, boşsa Afiş koleksiyonundan çek
   const heroItems = (content.hero.items && content.hero.items.length > 0)
     ? content.hero.items
-    : allWorks.slice(0, content.hero.count).map((w) => ({ image: w.image, title: w.title, fit: defaultFit }))
+    : (collections.find((c) => c.id === 'afis')?.works || allWorks)
+        .slice(0, content.hero.count)
+        .map((w) => ({ image: w.image, title: w.title, fit: defaultFit }))
   const products = heroItems
     .filter((it) => it && it.image)
     .map((it, i) => ({
@@ -73,7 +74,12 @@ function SiteRoot() {
       thumbnail: it.image,
       fit: it.fit || defaultFit,
     }))
-  const images = allWorks.slice(0, content.zoom.count).map((w) => w.image)
+  
+  // Arc galeri görselleri: arc.images doluysa onu kullan, boşsa çalışmalardan
+  const arcImages = (content.arc?.images && content.arc.images.length > 0)
+    ? content.arc.images
+    : allWorks.slice(0, content.zoom.count).map((w) => w.image)
+
   const SERVICES = content.services
 
   const [lenis, setLenis] = useState(null)
@@ -209,8 +215,6 @@ function SiteRoot() {
 
           <Slider />
 
-          <ZoomParallax images={images} />
-
           <BentoCard />
 
           {/* Tasarım Portfolyom Alanı */}
@@ -272,7 +276,13 @@ function SiteRoot() {
               </div>
             </section>
 
-            <ArcGalleryHero images={images} />
+            <ArcGalleryHero 
+              images={arcImages}
+              heading={content.arc?.heading}
+              subtitle={content.arc?.subtitle}
+              button1Text={content.arc?.button1Text}
+              button2Text={content.arc?.button2Text}
+            />
 
             <div id="video">
               <VideoEdit />

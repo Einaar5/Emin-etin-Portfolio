@@ -66,6 +66,7 @@ const BlurText = ({
 // ==========================================
 const ProductCard = ({ product, translate }) => {
     const [hovered, setHovered] = React.useState(false);
+    const [loaded, setLoaded] = React.useState(false);
     const fit = product.fit === "contain" ? "contain" : "cover";
 
     return (
@@ -95,11 +96,29 @@ const ProductCard = ({ product, translate }) => {
                     background: fit === "contain" ? "#f1f5f9" : "transparent",
                 }}
             >
+                {!loaded && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "#f1f5f9",
+                            color: "#64748b",
+                            fontSize: "0.9rem",
+                            fontWeight: 500,
+                        }}
+                    >
+                        Yükleniyor...
+                    </div>
+                )}
                 <img
                     src={product.thumbnail}
                     alt={product.title}
                     loading="lazy"
                     decoding="async"
+                    onLoad={() => setLoaded(true)}
                     style={{
                         position: "absolute",
                         inset: 0,
@@ -107,6 +126,8 @@ const ProductCard = ({ product, translate }) => {
                         height: "100%",
                         objectFit: fit,
                         objectPosition: fit === "cover" ? "left top" : "center",
+                        opacity: loaded ? 1 : 0,
+                        transition: "opacity 0.3s",
                     }}
                 />
             </a>

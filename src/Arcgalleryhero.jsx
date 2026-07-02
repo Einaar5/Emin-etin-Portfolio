@@ -2,6 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 
 export default function ArcGalleryHero({
     images = [],
+    heading = "Tasarımla Hikayeni Anlat",
+    subtitle = "Logodan afişe, katalogdan banner tasarımına; markanı öne çıkaran özgün görseller üretiyorum.",
+    button1Text = "Çalışmaları Gör",
+    button2Text = "İletişime Geç",
     startAngle = 20,
     endAngle = 160,
     radiusLg = 480,
@@ -151,7 +155,7 @@ export default function ArcGalleryHero({
                         color: '#0d0d0b',
                         marginBottom: '1rem',
                     }}>
-                        Tasarımla Hikayeni Anlat
+                        {heading}
                     </h1>
                     <p style={{
                         fontSize: 'clamp(1rem, 1.5vw, 1.15rem)',
@@ -159,8 +163,7 @@ export default function ArcGalleryHero({
                         lineHeight: 1.7,
                         marginBottom: '2rem',
                     }}>
-                        Logodan afişe, katalogdan banner tasarımına; markanı
-                        öne çıkaran özgün görseller üretiyorum.
+                        {subtitle}
                     </p>
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button
@@ -175,7 +178,7 @@ export default function ArcGalleryHero({
                             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.22)'; }}
                             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.18)'; }}
                         >
-                            Çalışmaları Gör
+                            {button1Text}
                         </button>
                         <button
                             style={{
@@ -188,7 +191,7 @@ export default function ArcGalleryHero({
                             onMouseEnter={e => { e.currentTarget.style.background = '#f0f0ee'; e.currentTarget.style.borderColor = '#a0a09a'; }}
                             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e2e2de'; }}
                         >
-                            İletişime Geç
+                            {button2Text}
                         </button>
                     </div>
                 </div>

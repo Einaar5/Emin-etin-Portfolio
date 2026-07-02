@@ -13,6 +13,7 @@ const TABS = [
   { id: "about", label: "Hakkımda" },
   { id: "collections", label: "Koleksiyonlar" },
   { id: "services", label: "Hizmetler" },
+  { id: "arc", label: "Arc Galeri" },
   { id: "video", label: "Video" },
   { id: "contact", label: "İletişim & Footer" },
   { id: "general", label: "Genel" },
@@ -97,6 +98,7 @@ export default function AdminPanel() {
         {tab === "about" && <AboutTab content={content} update={update} />}
         {tab === "collections" && <CollectionsTab content={content} update={update} />}
         {tab === "services" && <ServicesTab content={content} update={update} />}
+        {tab === "arc" && <ArcTab content={content} update={update} />}
         {tab === "video" && <VideoTab content={content} update={update} />}
         {tab === "contact" && <ContactTab content={content} update={update} />}
         {tab === "general" && <GeneralTab content={content} update={update} />}
@@ -448,6 +450,95 @@ function ServicesTab({ content, update }) {
           </div>
         </div>
       ))}
+    </>
+  )
+}
+
+/* ------------------------- Arc Galeri ------------------------- */
+function ArcTab({ content, update }) {
+  const arc = content.arc || {}
+  const images = arc.images || []
+  const editArc = (patch) => update((c) => ({ ...c, arc: { ...c.arc, ...patch } }))
+  const setImages = (fn) => update((c) => ({ ...c, arc: { ...c.arc, images: fn(c.arc.images || []) } }))
+
+  const allWorks = content.collections.flatMap((c) => c.works)
+
+  const addImage = () => setImages((imgs) => [...imgs, ""])
+  const editImage = (idx, val) => setImages((imgs) => imgs.map((img, i) => (i === idx ? val : img)))
+  const removeImage = (idx) => setImages((imgs) => imgs.filter((_, i) => i !== idx))
+
+  const fillFromWorks = () => {
+    const n = Math.max(1, parseInt(content.zoom?.count, 10) || 13)
+    const seeded = allWorks.slice(0, n).map((w) => w.image)
+    setImages(() => seeded)
+  }
+
+  const clearImages = () => {
+    if (confirm("Arc galeri görsel listesi temizlenecek. Liste boşken çalışmaların ilk görselleri otomatik kullanılır. Devam edilsin mi?")) {
+      setImages(() => [])
+    }
+  }
+
+  return (
+    <>
+      <div className="adm-card">
+        <h3>Arc Galeri Metinler</h3>
+        <div className="adm-field">
+          <label>Başlık</label>
+          <input className="adm-input" value={arc.heading || ""} onChange={(e) => editArc({ heading: e.target.value })} />
+        </div>
+        <div className="adm-field">
+          <label>Alt başlık</label>
+          <textarea className="adm-textarea" value={arc.subtitle || ""} onChange={(e) => editArc({ subtitle: e.target.value })} />
+        </div>
+        <div className="adm-row">
+          <div className="adm-field">
+            <label>Buton 1 Metni</label>
+            <input className="adm-input" value={arc.button1Text || ""} onChange={(e) => editArc({ button1Text: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Buton 2 Metni</label>
+            <input className="adm-input" value={arc.button2Text || ""} onChange={(e) => editArc({ button2Text: e.target.value })} />
+          </div>
+        </div>
+      </div>
+
+      <div className="adm-card">
+        <div className="adm-card-head">
+          <h3>Arc Galeri Görselleri</h3>
+          <div className="adm-top-spacer" />
+          <div className="adm-actions">
+            <button className="adm-btn" onClick={fillFromWorks}>⤵ Çalışmalardan doldur</button>
+            <button className="adm-btn primary" onClick={addImage}>+ Görsel Ekle</button>
+          </div>
+        </div>
+
+        <p className="adm-hint" style={{ marginBottom: 12 }}>
+          Arc şeklinde görünen görseller bu listeden gelir. Liste <strong>boşsa</strong> otomatik olarak 
+          çalışmaların ilk {content.zoom?.count || 13} görseli kullanılır.
+        </p>
+
+        {images.length === 0 && (
+          <p className="adm-hint">Liste boş — şu an çalışmaların ilk {content.zoom?.count || 13} görseli otomatik gösteriliyor.</p>
+        )}
+
+        {images.map((img, idx) => (
+          <div className="adm-work" key={idx}>
+            <ImageField value={img} onChange={(val) => editImage(idx, val)} />
+            <div className="adm-work-fields">
+              <div className="adm-actions">
+                <button className="adm-btn icon" disabled={idx === 0} onClick={() => setImages((x) => move(x, idx, idx - 1))}>↑</button>
+                <button className="adm-btn icon" disabled={idx === images.length - 1} onClick={() => setImages((x) => move(x, idx, idx + 1))}>↓</button>
+                <button className="adm-btn danger" onClick={() => removeImage(idx)}>Sil</button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {images.length > 0 && (
+          <button className="adm-btn danger" style={{ marginTop: 12 }} onClick={clearImages}>Listeyi temizle (otomatiğe dön)</button>
+        )}
+      </div>
     </>
   )
 }
