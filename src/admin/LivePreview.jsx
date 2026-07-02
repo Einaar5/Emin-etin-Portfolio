@@ -146,9 +146,9 @@ export default function LivePreview() {
         <SectionTag>Header · Vitrin</SectionTag>
         <section style={{ padding: "40px 24px 56px", textAlign: "center" }}>
           <EditableText as="div" value={content.hero.title1 ?? ""} onSave={(v) => setHero({ title1: v })}
-            style={{ fontFamily: "'Fira Code', monospace", fontWeight: 800, color: "#C3E41D", fontSize: "clamp(48px,11vw,150px)", lineHeight: 0.85, letterSpacing: "-0.04em", textTransform: "uppercase" }} />
+            style={{ fontFamily: "'Fira Code', monospace", fontWeight: 800, color: "#7DD3FC", fontSize: "clamp(48px,11vw,150px)", lineHeight: 0.85, letterSpacing: "-0.04em", textTransform: "uppercase" }} />
           <EditableText as="div" value={content.hero.title2 ?? ""} onSave={(v) => setHero({ title2: v })}
-            style={{ fontFamily: "'Fira Code', monospace", fontWeight: 800, color: "#C3E41D", fontSize: "clamp(48px,11vw,150px)", lineHeight: 0.85, letterSpacing: "-0.04em", textTransform: "uppercase" }} />
+            style={{ fontFamily: "'Fira Code', monospace", fontWeight: 800, color: "#7DD3FC", fontSize: "clamp(48px,11vw,150px)", lineHeight: 0.85, letterSpacing: "-0.04em", textTransform: "uppercase" }} />
           <EditableText as="div" value={content.hero.slogan ?? ""} onSave={(v) => setHero({ slogan: v })}
             style={{ marginTop: 22, color: "#6b6b65", fontSize: "clamp(15px,2vw,22px)", fontFamily: "'Antic', sans-serif" }} />
 

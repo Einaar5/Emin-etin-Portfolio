@@ -570,10 +570,14 @@ function BackupTab({ content, reset, replace }) {
     <div className="adm-card">
       <h3>Kaydet / Yedek</h3>
       <p className="adm-hint" style={{ marginBottom: 16 }}>
-        Değişiklikler otomatik olarak bu tarayıcıya kaydedilir. Tüm ziyaretçilere yansıması için
-        "JSON İndir" ile dosyayı indirip <code>content.json</code> olarak siteyle birlikte
-        yeniden yayınlayın.
+        Değişiklikler otomatik olarak <strong>yalnızca bu tarayıcıya</strong> kaydedilir; canlı sitede
+        herkese görünmez. Yayınlamak için:
       </p>
+      <ol className="adm-hint" style={{ marginBottom: 16, paddingLeft: 20, lineHeight: 1.7 }}>
+        <li>Aşağıdan <strong>"JSON İndir"</strong> ile dosyayı indir.</li>
+        <li>İnen dosyayı <code>content.json</code> adıyla projedeki <code>public/</code> klasörüne koy (varsa üzerine yaz).</li>
+        <li>Siteyi yeniden deploy et. Artık tüm ziyaretçiler güncel içeriği görür.</li>
+      </ol>
 
       {msg && <div className={msg.type === "ok" ? "adm-hint" : "adm-warn"} style={msg.type === "ok" ? { color: "var(--adm-green)" } : undefined}>{msg.text}</div>}
 

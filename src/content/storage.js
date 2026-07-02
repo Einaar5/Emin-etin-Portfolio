@@ -29,6 +29,30 @@ export function loadContent() {
   }
 }
 
+// Sadece bu tarayıcıdaki taslağı (localStorage) döndürür. Yoksa null.
+export function loadLocalDraft() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+// Yayınlanmış içeriği (public/content.json) getirir. Yoksa/başarısızsa null.
+// Bu dosya tüm ziyaretçiler için ortak (canlı) içeriktir.
+export async function fetchPublishedContent() {
+  try {
+    const base = import.meta.env.BASE_URL || "/"
+    const res = await fetch(`${base}content.json`, { cache: "no-store" })
+    if (!res.ok) return null
+    const parsed = await res.json()
+    return isObject(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
 // localStorage'a kaydet. Sınır aşılırsa { ok:false, error } döner.
 export function saveContent(content) {
   try {

@@ -272,7 +272,7 @@ export default function HeroParallaxCustom({ products = [], hero = {} }) {
                                 animateBy="letters"
                                 direction="top"
                                 className="font-bold text-[100px] sm:text-[140px] md:text-[180px] lg:text-[210px] leading-[0.75] tracking-tighter uppercase justify-center whitespace-nowrap"
-                                style={{ color: "#C3E41D", fontFamily: "'Fira Code', monospace" }}
+                                style={{ color: "#7DD3FC", fontFamily: "'Fira Code', monospace" }}
                             />
                         </div>
                         <div>
@@ -282,7 +282,7 @@ export default function HeroParallaxCustom({ products = [], hero = {} }) {
                                 animateBy="letters"
                                 direction="top"
                                 className="font-bold text-[100px] sm:text-[140px] md:text-[180px] lg:text-[210px] leading-[0.75] tracking-tighter uppercase justify-center whitespace-nowrap"
-                                style={{ color: "#C3E41D", fontFamily: "'Fira Code', monospace" }}
+                                style={{ color: "#7DD3FC", fontFamily: "'Fira Code', monospace" }}
                             />
                         </div>
 
