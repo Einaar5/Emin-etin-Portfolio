@@ -9,7 +9,20 @@ export default function GalleryPage({ collections, initialId, onBack }) {
   const active = collections.find((c) => c.id === activeId) || collections[0]
   const works = active?.works ?? []
 
-  const close = useCallback(() => setLightbox(null), [])
+  const close = useCallback(() => {
+    setLightbox(null)
+    // Hash'i temizle ama history'ye ekleme
+    if (window.location.hash === '#lightbox') {
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+  }, [])
+
+  const openLightbox = useCallback((index) => {
+    setLightbox(index)
+    // Lightbox açıldığında hash ekle (geri tuşu için)
+    history.pushState(null, '', '#lightbox')
+  }, [])
+
   const next = useCallback(
     () => setLightbox((i) => (i === null ? i : (i + 1) % works.length)),
     [works.length]
@@ -21,6 +34,18 @@ export default function GalleryPage({ collections, initialId, onBack }) {
 
   useEffect(() => { window.scrollTo(0, 0) }, [activeId])
   useEffect(() => { setActiveId(initialId || collections[0]?.id) }, [initialId, collections])
+
+  // Geri tuşu için popstate event listener
+  useEffect(() => {
+    const handlePopState = () => {
+      if (lightbox !== null) {
+        setLightbox(null)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [lightbox])
 
   useEffect(() => {
     if (lightbox === null) return
@@ -75,7 +100,7 @@ export default function GalleryPage({ collections, initialId, onBack }) {
       {/* Masonry galeri */}
       <div className="gp-grid">
         {works.map((w, i) => (
-          <figure key={w.id} className="gp-card" onClick={() => setLightbox(i)} style={{ animationDelay: `${i * 50}ms` }}>
+          <figure key={w.id} className="gp-card" onClick={() => openLightbox(i)} style={{ animationDelay: `${i * 50}ms` }}>
             <img src={w.image} alt={w.title} loading="lazy" />
             <figcaption>
               <span>{w.title}</span>
