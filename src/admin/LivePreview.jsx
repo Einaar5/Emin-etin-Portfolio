@@ -292,10 +292,16 @@ export default function LivePreview() {
           <EditableText as="h2" className="section-heading" html value={content.video.heading} onSave={(v) => setVideo({ heading: v })} />
           <EditableText as="p" className="about-body" multiline value={content.video.desc} onSave={(v) => setVideo({ desc: v })} />
           <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 13, color: "#6b6b65" }}>Buton:</span>
+            <span style={{ fontSize: 13, color: "#6b6b65" }}>1. Buton:</span>
             <EditableText value={content.video.label} onSave={(v) => setVideo({ label: v })} style={{ fontWeight: 600 }} />
             <span style={{ fontSize: 13, color: "#6b6b65" }}>· Link:</span>
             <EditableText value={content.video.channelUrl} onSave={(v) => setVideo({ channelUrl: v })} style={{ fontSize: 13, color: "#2f6feb" }} />
+          </div>
+          <div style={{ marginTop: 8, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ fontSize: 13, color: "#6b6b65" }}>2. Buton:</span>
+            <EditableText value={content.video.button2Label ?? ""} onSave={(v) => setVideo({ button2Label: v })} style={{ fontWeight: 600 }} placeholder="(1. butonla aynı)" />
+            <span style={{ fontSize: 13, color: "#6b6b65" }}>· Link:</span>
+            <EditableText value={content.video.button2Url ?? ""} onSave={(v) => setVideo({ button2Url: v })} style={{ fontSize: 13, color: "#2f6feb" }} placeholder="(1. butonla aynı)" />
           </div>
           <p className="adm-hint" style={{ color: "#94a3b8", marginTop: 8 }}>Gömülü oynatıcı (embed) linkini "Video" sekmesinden değiştirebilirsin.</p>
         </section>

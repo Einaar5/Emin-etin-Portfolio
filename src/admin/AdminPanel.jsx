@@ -29,7 +29,7 @@ const move = (arr, i, j) => {
 const uid = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 
 export default function AdminPanel() {
-  const { content, update, reset, replace, saveError } = useContent()
+  const { content, update, reset, replace, syncFromPublished, saveError } = useContent()
   const [tab, setTab] = useState("live")
 
   const exit = () => {
@@ -71,7 +71,7 @@ export default function AdminPanel() {
         {tab === "video" && <VideoTab content={content} update={update} />}
         {tab === "contact" && <ContactTab content={content} update={update} />}
         {tab === "general" && <GeneralTab content={content} update={update} />}
-        {tab === "backup" && <BackupTab content={content} reset={reset} replace={replace} />}
+        {tab === "backup" && <BackupTab content={content} reset={reset} replace={replace} syncFromPublished={syncFromPublished} />}
       </div>
     </div>
   )
@@ -447,9 +447,20 @@ function VideoTab({ content, update }) {
         <input className="adm-input" value={v.label} onChange={(e) => edit({ label: e.target.value })} />
       </div>
       <div className="adm-field">
-        <label>Kanal linki (buton)</label>
+        <label>1. Buton — kanal linki</label>
         <input className="adm-input" value={v.channelUrl} onChange={(e) => edit({ channelUrl: e.target.value })} />
       </div>
+      <div className="adm-row">
+        <div className="adm-field">
+          <label>2. Buton etiketi</label>
+          <input className="adm-input" value={v.button2Label ?? ""} onChange={(e) => edit({ button2Label: e.target.value })} />
+        </div>
+        <div className="adm-field">
+          <label>2. Buton linki (URL)</label>
+          <input className="adm-input" value={v.button2Url ?? ""} onChange={(e) => edit({ button2Url: e.target.value })} />
+        </div>
+      </div>
+      <p className="adm-hint">2. buton alanları boş bırakılırsa 1. butonun etiketi/linki kullanılır.</p>
       <div className="adm-field">
         <label>Önizleme URL etiketi</label>
         <input className="adm-input" value={v.previewUrl} onChange={(e) => edit({ previewUrl: e.target.value })} />
@@ -541,9 +552,17 @@ function GeneralTab({ content, update }) {
 }
 
 /* ------------------------- Kaydet / Yedek ------------------------- */
-function BackupTab({ content, reset, replace }) {
+function BackupTab({ content, reset, replace, syncFromPublished }) {
   const fileRef = useRef(null)
   const [msg, setMsg] = useState(null)
+
+  const onSync = async () => {
+    if (!confirm("Yayındaki content.json çekilecek ve bu tarayıcıdaki tüm yerel düzenlemeler onunla değiştirilecek. Devam edilsin mi?")) return
+    const ok = await syncFromPublished()
+    setMsg(ok
+      ? { type: "ok", text: "Yayındaki içerik çekildi ve yerel taslak sıfırlandı." }
+      : { type: "err", text: "Yayında content.json bulunamadı; varsayılana dönüldü." })
+  }
 
   const onImport = async (e) => {
     const file = e.target.files?.[0]
@@ -584,6 +603,7 @@ function BackupTab({ content, reset, replace }) {
       <div className="adm-actions" style={{ gap: 10 }}>
         <button className="adm-btn green" onClick={() => exportContent(content)}>⬇ JSON İndir</button>
         <button className="adm-btn" onClick={() => fileRef.current?.click()}>⬆ JSON Yükle</button>
+        <button className="adm-btn" onClick={onSync}>⟳ Yayından Çek</button>
         <button className="adm-btn danger" onClick={onReset}>↺ Varsayılana Sıfırla</button>
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={onImport} style={{ display: "none" }} />
       </div>

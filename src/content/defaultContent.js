@@ -119,6 +119,9 @@ export const DEFAULT_CONTENT = {
     embedUrl: "https://www.youtube-nocookie.com/embed/videoseries?list=UUGPjKD70Vf9giHNXuEgRrbA",
     label: "YouTube · @Hermitme",
     previewUrl: "youtube.com/@Hermitme",
+    // 2. buton (ayrı etiket + link). Boş bırakılırsa 1. butonun verisi kullanılır.
+    button2Label: "YouTube · @Hermitme",
+    button2Url: "https://www.youtube.com/@Hermitme",
   },
 
   contact: {

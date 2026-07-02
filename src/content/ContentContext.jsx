@@ -4,20 +4,28 @@ import { DEFAULT_CONTENT } from "./defaultContent"
 
 const ContentContext = createContext(null)
 
+const isAdminMode = () => typeof window !== "undefined" && window.location.hash === "#admin"
+
 export function ContentProvider({ children }) {
-  const [content, setContent] = useState(loadContent)
+  // Başlangıç: admin isek yerel taslak, değilsek varsayılan (canlıda localStorage'a bakma).
+  const [content, setContent] = useState(() => (isAdminMode() ? loadContent() : structuredClone(DEFAULT_CONTENT)))
   const [saveError, setSaveError] = useState(null)
 
-  // Açılışta yayınlanmış content.json'ı getir (tüm ziyaretçiler için canlı içerik).
-  // Öncelik: bu tarayıcıdaki taslak (varsa) > yayınlanmış content.json > varsayılan.
-  // Böylece ziyaretçiler content.json'ı görür; admin ise kendi taslağını görmeye devam eder.
+  // Açılışta yayınlanmış content.json'ı getir. Model:
+  //  • CANLI SİTE (ziyaretçi)  → yalnızca content.json (DB gibi). localStorage'a BAKMAZ.
+  //  • ADMIN (#admin)          → content.json'un üzerine kendi düzenleme taslağını uygular.
+  // Böylece canlıda herkes content.json'ı görür; eski yerel taslaklar canlıya karışmaz.
   useEffect(() => {
     let cancelled = false
     fetchPublishedContent().then((published) => {
-      if (cancelled || !published) return
-      const draft = loadLocalDraft()
-      const base = deepMerge(DEFAULT_CONTENT, published)
-      setContent(draft ? deepMerge(base, draft) : base)
+      if (cancelled) return
+      const base = published ? deepMerge(DEFAULT_CONTENT, published) : structuredClone(DEFAULT_CONTENT)
+      if (isAdminMode()) {
+        const draft = loadLocalDraft()
+        setContent(draft ? deepMerge(base, draft) : base)
+      } else {
+        setContent(base) // canlı: sadece yayınlanmış içerik
+      }
     })
     return () => { cancelled = true }
   }, [])
@@ -44,8 +52,18 @@ export function ContentProvider({ children }) {
     setContent(value)
   }, [])
 
+  // Yayınlanmış content.json'ı çekip yereli onunla değiştir (eski taslağı siler).
+  const syncFromPublished = useCallback(async () => {
+    const published = await fetchPublishedContent()
+    const base = published ? deepMerge(DEFAULT_CONTENT, published) : structuredClone(DEFAULT_CONTENT)
+    saveContent(base)
+    setContent(base)
+    setSaveError(null)
+    return !!published
+  }, [])
+
   return (
-    <ContentContext.Provider value={{ content, update, reset, replace, saveError }}>
+    <ContentContext.Provider value={{ content, update, reset, replace, syncFromPublished, saveError }}>
       {children}
     </ContentContext.Provider>
   )
